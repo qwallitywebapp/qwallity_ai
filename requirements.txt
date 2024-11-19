@@ -133,3 +133,4 @@ python-dotenv
 lxml
 greenlet
 typed-ast
+openai
