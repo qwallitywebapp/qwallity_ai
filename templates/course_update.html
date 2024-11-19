@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+Update Course
+{% endblock %}
+
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Update Course</h1>
+
+    <form method="POST">
+        <input type="text" name="title" id="title" class="form-control" value="{{ course.title }}" placeholder="Input title" ><br>
+        <textarea name="body" id="body" class="form-control" placeholder="Input text">{{ course.body | safe }}</textarea></br>
+        <input type="submit" class="btn btn-success" value="Update">
+    </form>
+</div>
+{% endblock %}

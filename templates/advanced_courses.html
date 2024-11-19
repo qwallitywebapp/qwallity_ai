@@ -1,0 +1,37 @@
+
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>Advanced</h1>
+  <style>
+    table, th, td {
+      
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 5px;
+      text-align: left;
+    }
+    </style>
+    </head>
+    <body>
+    
+    <table style="width:100%">
+      <tr>
+        <th style="width:30%">Author</th>
+        <th style="width:100%">Title</th>
+        <th style="width:100%">Buy</th>
+      </tr>
+    
+      <tr>
+        
+    {% for course in courses %}
+        <td>{{course.author}}</td>
+        <td>{{course.title}}</td>
+        <td><a href="course/{{course.id}}">Buy</a></td>
+      </tr>
+    {% endfor %}
+    </table>
+
+{% endblock %}

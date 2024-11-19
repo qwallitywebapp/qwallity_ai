@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script src="/static/my.js"></script>
+<form id="loginForm">
+    <h1><div id="login">Login</div></h1>
+    <span class="success" id="successmessage"></span>
+    <div id="loadingMessage" style="display:none; color: rgb(206, 117, 22);"></div> <!-- Loading message -->
+    <label class="control-label" for="username">Username</label>
+    <input class="form-control" type="text" id="username" name="username">
+    <label class="control-label" for="password">Password</label>
+    <input class="form-control" type="password" id="password" name="password">
+    <br>
+    <button type ="submit" id='submit_login_page' name='Submit' value="Submit" style="width: 125px" class ="btn btn-primary">Log In</button>
+</form>
+{% endblock %}

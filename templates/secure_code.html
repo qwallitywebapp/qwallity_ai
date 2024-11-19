@@ -1,0 +1,18 @@
+ 
+{% extends 'layout_enter.html' %}
+
+{% block body %}
+  <h1><small>Enter Secure Code</small></h1>
+  {% from "includes/_formhelpers.html" import render_field %}
+  <form method="POST" action="">
+    <div class="form-group">
+      {{render_field(form.email, class_="form-control")}}
+    </div>
+    <div class="form-group">
+      {{render_field(form.secure_code, class_="form-control")}}
+    </div>
+    <p><input type="submit" class="btn btn-primary" value="Enter to app"></p>
+  </form>
+{% endblock %}
+
+

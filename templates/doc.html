@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<h1><small>Qwallity App Documentation</small></h1>
+<a href="#" onclick="openLink('{{ doc_path }}')">Documentation</a>
+
+<script>
+    function openLink(url) {
+        window.open(url, '_blank');
+    }
+</script>
+{% endblock %}

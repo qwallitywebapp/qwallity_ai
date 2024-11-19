@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+{{ course.title }}
+{% endblock %}
+
+
+{% block body %}
+<div class="container mt-5">
+    <h1>{{ course.title }}-{{ course.price }}$</h1>
+    <p>{{ course.body | safe }}</p>
+    <form method="POST" action="">
+    <button type ="submit" name='Buy' value="Buy" style="width: 125 px" class ="btn btn-primary">Buy</button>
+    </form>
+</div>
+{% endblock %} 

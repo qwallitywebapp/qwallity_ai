@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script src="/static/my.js"></script>
+<form>
+    <span class="success" id="successmessage"></span>
+
+    <label class="control-label" for="acc_balance">Account Balance</label>
+    <input class="form-control" type="number" id="acc_balance" name="acc_balance" readonly>
+
+    <label class="control-label" for="amount">Amount</label>
+    <input class="form-control" type="number" id="amount" name="amount">
+
+    <label class="control-label">Payment Method</label>
+    <select onchange="checkIfCard()" class="select form-control" id="payment" name="payment">
+        <option value="1">Cash</option>
+        <option value="2">Credit Card</option>
+    </select>
+
+    <div id="extra" style="display: none;">
+        <label class="control-label" for="card_num">Card Number</label>
+        <input class="form-control" type="number" maxlength="16" id="card_num" name="card_num" required disabled>
+
+        <label class="control-label" for="exp_date">Exp Date</label>
+        <input class="form-control" type="date" id="exp_date" name="exp_date" required disabled>
+
+        <label class="control-label" for="card_cvv">Card CVV</label>
+        <input class="form-control" type="number" maxlength="3" id="card_cvv" name="card_cvv" required disabled>
+    </div>
+
+    <br>
+    <button type="submit" id='Submit' name='Submit' value="Submit" style="width: 125px" class="btn btn-primary" onclick="js_add_payment(event)">Checkout</button>
+
+    <script>
+        // Fetch the account balance and set the input value
+        fetch('/balance/balance_api', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // Include the token in the Authorization header
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("acc_balance").value = data.balance;
+        })
+        .catch(error => {
+            console.error('Error fetching account balance:', error);
+        });
+
+        function checkIfCard() {
+            const paymentMethod = document.getElementById('payment').value;
+            const extraFields = document.getElementById('extra');
+            const cardNum = document.getElementById('card_num');
+            const expDate = document.getElementById('exp_date');
+            const cardCvv = document.getElementById('card_cvv');
+
+            if (paymentMethod == '2') {
+                extraFields.style.display = '';
+                cardNum.disabled = false;
+                expDate.disabled = false;
+                cardCvv.disabled = false;
+            } else {
+                extraFields.style.display = 'none';
+                // Disable fields if not using credit card
+                cardNum.disabled = true;
+                expDate.disabled = true;
+                cardCvv.disabled = true;
+            }
+        }
+
+        // Fetch and display print receipt visibility based on API response
+        const xhr1 = new XMLHttpRequest();
+        xhr1.open("GET", "https://api.npoint.io/b858b1bf92593d3a8278");
+        xhr1.responseType = "json";
+        xhr1.onload = () => {
+            if (xhr1.readyState == 4 && xhr1.status == 200) {
+                var print_receipt = xhr1.response['receipt'][0]['print_receipt'];
+
+            }
+        };
+        xhr1.send();
+    </script>
+
+    <a href="/receipt" id="print_receipt">Print Receipt</a>
+</form>
+
+{% endblock %}

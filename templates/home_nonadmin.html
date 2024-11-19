@@ -1,0 +1,91 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<h1><div id="welcome_text"></div></h1>
+<script>
+  // Retrieve the stored name from local storage
+  var username = localStorage.getItem("username");
+  document.getElementById('welcome_text').textContent = 'Welcome ' + username + '!';
+</script>
+<br>
+<hr>
+<table class="table table-striped">
+  <tr>
+    <th>ID</th>
+    <th>Title</th>
+    <th>Author</th>
+    <th>Price</th>
+    <th>Date</th>
+  </tr>
+  {% for course in courses %}
+    <tr>
+      <td>{{course.id}}</td>
+      <td>{{course.title}}</td>
+      <td>{{course.author}}</td>
+      <td>{{course.price}}</td>
+      <td>{{course.date_created.date()}}</td>
+    </tr>
+  {% endfor %}
+</table>
+
+<!-- Chat Popup HTML Code -->
+<div id="chat-popup" class="chat-popup">
+  <div id="chat-box" class="chat-box">
+    <div id="chat-messages" class="chat-messages">
+      <!-- Chat messages will appear here -->
+    </div>
+  </div>
+  <input id="user-input" type="text" placeholder="Type a message..." />
+  <button id="send-button">Send</button>
+</div>
+
+<!-- Toggle Button for Chat Window -->
+<button id="chat-toggle" class="chat-toggle">Chat</button>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+// Chat Window Logic
+
+// Show/Hide Chat Popup
+document.getElementById("chat-toggle").onclick = function () {
+  var chatPopup = document.getElementById("chat-popup");
+  chatPopup.style.display = chatPopup.style.display === "block" ? "none" : "block";
+};
+
+// Send Message Function
+document.getElementById("send-button").onclick = async function () {
+  var userInput = document.getElementById("user-input").value;
+  if (userInput.trim() !== "") {
+    // Display user message in the chat window
+    var chatMessages = document.getElementById("chat-messages");
+    var userMessage = document.createElement("div");
+    userMessage.textContent = "You: " + userInput;
+    chatMessages.appendChild(userMessage);
+    
+    // Clear the input field
+    document.getElementById("user-input").value = "";
+
+    // Call your backend or API to get an answer from the chatbot
+    const response = await axios.post('/api/chat', { message: userInput });
+    var botMessage = document.createElement("div");
+    botMessage.textContent = "Bot: " + response.data.answer;
+    chatMessages.appendChild(botMessage);
+
+    // Scroll chat to the bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+};
+
+// Backend Route to Handle Chat Request (example using Flask)
+app.post('/api/chat', async (req, res) => {
+  const userMessage = req.body.message;
+  
+  // Call your OpenAI or other AI service to get a response
+  const botResponse = await getBotResponse(userMessage);
+  res.json({ answer: botResponse });
+});
+</script>
+
+{% endblock %}

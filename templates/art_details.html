@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+{{ course.title }}
+{% endblock %}
+
+
+{% block body %}
+<div class="container mt-5">
+    <h1>{{ course.title }}</h1>
+
+    <p  max-width: 40em; max-width: 100ch>{{ course.body | safe }}</p>
+    <a href="/course/{{ course.id }}/delete" class="btn btn-danger">Delete</a>
+    <a href="/course/{{ course.id }}/update" class="btn btn-success">Edit</a>
+
+</div>
+{% endblock %} 

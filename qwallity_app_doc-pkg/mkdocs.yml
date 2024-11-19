@@ -1,0 +1,13 @@
+site_name: qwallity_app_docs
+nav:
+  - Home: home.md
+  - Login Screen: login_page.md
+  - Registration: registration_page.md
+  - Profile: profile_page.md
+  - Weather: weather_page.md
+  - Login_Tracking: login_tracking_page.md
+  - Account_Balance: account_balance.md
+  - Forget_Password: forget_password.md
+  - Course_Actions: course_actions.md
+  - Print_Receipt: print_receipt.md
+theme: readthedocs
