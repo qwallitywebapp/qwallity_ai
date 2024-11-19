@@ -1,0 +1,22 @@
+ {% extends 'layout.html' %}
+
+{% block body %}
+    {% from "includes/_formhelpers.html" import render_field %}
+    <h1>Admin page</h1>
+    <h1><small>User</small></h1>
+    <form method="POST" action="">
+        <div class="form-group">
+            {{ render_field(form2.username, class_="form-control") }}
+        </div>
+    <br>
+    <h1><small>Role</small></h1>
+    <select name= roles method="GET" action="/">  
+        {% for role in roles %}
+        <option value= "{{role}}" SELECTED>{{role}}</option>"
+        {% endfor %}
+    </select>
+<br>
+<br>
+<br>
+<p><input class="btn btn-primary" type="submit" value="Change Role">
+{% endblock %}

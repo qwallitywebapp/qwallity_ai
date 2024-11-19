@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Course_Actions - qwallity_app_docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Course_Actions";
+        var mkdocs_page_input_path = "course_actions.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> qwallity_app_docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../home/">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../login_page/">Login Screen</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../registration_page/">Registration</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../profile_page/">Profile</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../weather_page/">Weather</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../login_tracking_page/">Login_Tracking</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../account_balance/">Account_Balance</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../forget_password/">Forget_Password</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Course_Actions</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#as-an-admin-i-want-to-be-able-to-add-new-courses-edit-or-delete-them-both-admin-and-non-admin-users-can-view-all-courses">As an admin, I want to be able to add new courses, edit, or delete them. Both admin and non-admin users can view all courses.</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#acceptance-criteria">Acceptance Criteria</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../print_receipt/">Print_Receipt</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">qwallity_app_docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Course_Actions</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="user-story-course-actions">User Story: Course Actions</h1>
+<h2 id="as-an-admin-i-want-to-be-able-to-add-new-courses-edit-or-delete-them-both-admin-and-non-admin-users-can-view-all-courses">As an admin, I want to be able to add new courses, edit, or delete them. Both admin and non-admin users can view all courses.</h2>
+<h3 id="acceptance-criteria">Acceptance Criteria</h3>
+<ol>
+<li><strong>Add Course Screen:</strong></li>
+<li>The Add Course screen should have 4 fields: Title, Price, Type, Description, and a Submit button. (Users can add courses from the Home screen)<ul>
+<li>Title: System should allow alphabetical characters, up to 50 characters.</li>
+<li>Price: System should allow only numbers (int/float/decimal).</li>
+<li>Type: Drop-down should contain 2 types: Fundamental and Advanced.</li>
+<li>Description: Any characters, up to 250.</li>
+</ul>
+</li>
+<li>The Submit button should be in orange color.</li>
+<li>
+<p>After adding a new course, the user is redirected to the Home page where all courses are visible.</p>
+</li>
+<li>
+<p><strong>Course Viewing:</strong></p>
+</li>
+<li>Both admin and non-admin users can view all courses.</li>
+<li>Users can see separated courses on the Course page: Advanced and Fundamental.</li>
+<li>Selecting any of Advanced and Fundamental, the user is redirected to the corresponding course section. Author, Title, and Buy columns should be visible on the screen.</li>
+<li>
+<p>After clicking on Buy, the user is redirected to a separate screen where they can buy the course. The screen contains the following fields:</p>
+<ul>
+<li>Course title-price</li>
+<li>Course description</li>
+<li>Buy button (orange color)</li>
+</ul>
+</li>
+<li>
+<p><strong>Non-Admin User Behavior:</strong></p>
+</li>
+<li>
+<p>After clicking on the Buy button:</p>
+<ul>
+<li>If the account balance is insufficient, the user is redirected to the My Courses screen.</li>
+<li>In case of enough account balance, the user can see their bought courses on the My Courses screen.</li>
+</ul>
+</li>
+<li>
+<p><strong>Admin User Behavior:</strong></p>
+</li>
+<li>The Buy button is not visible.</li>
+<li>The Title is a link.</li>
+<li>After clicking on the Title, the admin is redirected to the Edit/delete screen.</li>
+<li>After clicking on the Edit button, the user is redirected to the Edit Course page. The page contains Title and Description fields, and a Submit button.</li>
+<li>After submission, the user gets a 'Your changes are done' message and redirects to the Courses page.</li>
+<li>After clicking on the Delete button, the admin is redirected to the Courses page, and a "Course is deleted" message displays.</li>
+</ol>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../forget_password/" class="btn btn-neutral float-left" title="Forget_Password"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../print_receipt/" class="btn btn-neutral float-right" title="Print_Receipt">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../forget_password/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../print_receipt/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

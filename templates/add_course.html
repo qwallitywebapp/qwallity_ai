@@ -1,0 +1,83 @@
+{% extends 'layout.html' %}
+
+
+
+{% block body %}
+<form>
+  <h1><small>Add Course</small></h1>
+  <script src="/static/my.js"></script>
+  <script>
+    const xhr1 = new XMLHttpRequest();
+    xhr1.open("GET", "https://api.npoint.io/b858b1bf92593d3a8278");
+    xhr1.send();
+    xhr1.responseType = "json";
+    xhr1.onload = () => {
+      if (xhr1.readyState == 4 && xhr1.status == 200) {
+          var title = xhr1.response['add_course_fields_required'][0]['title']
+          var price = xhr1.response['add_course_fields_required'][0]['price']
+          var description = xhr1.response['add_course_fields_required'][0]['description']
+          if(title==false){
+            document.getElementById("title").removeAttribute("required");
+            document.getElementById("labeltitle").removeAttribute("class");
+          }
+          else{
+            document.getElementById("title").setAttribute("required", "")
+            document.getElementById("labeltitle").setAttribute("class", "required")
+          }
+          if(price==false){
+            document.getElementById("price").removeAttribute("required");
+            document.getElementById("labelprice").removeAttribute("class");
+          }
+          else{
+            document.getElementById("price").setAttribute("required", "")
+            document.getElementById("labelprice").setAttribute("class", "required")
+          }
+          if(description==false){
+            document.getElementById("description").removeAttribute("required");
+            document.getElementById("labeldesc").removeAttribute("class");
+          }
+          else{
+            document.getElementById("description").setAttribute("required", "")
+            document.getElementById("labeldesc").setAttribute("class", "required")
+          }
+   
+    }
+  }
+  </script>
+  <div class="form-group">
+      <span class="success" id="successmessage"></span></p>
+      <label class="required" id="labeltitle">Title</label><br>
+      <input type="string" maxlength="50" name="title" id="title" required pattern="[a-zA-Z\s]+">
+      <span class="error" id="errornumber1"></span></p>
+  </div>
+    <div class="form-group" >
+      <label class="required" id="labelprice">Price</label><br>
+      <input type="number" name="price" id="price"   maxlength="4" required >
+      <select class="form-group" id="currency" name="type">
+        <option value="2">AMD</option>
+        <option value="1">USD</option>
+        <option value="1">EUR</option>
+      </select>
+    </div>
+    <label>Type</label><br>
+    <select class="form-group" id="coursetype" name="type">
+      <option value="2">Advanced</option>
+      <option value="1">Fundamental</option>
+    </select>
+  <br>
+  <div class="form-group">
+    <label id="labeldesc">Description</label><br>
+    <textarea  name="description" id="description"  rows="4" cols="60" maxlength="250"></textarea>
+  </div>
+      <!-- <button class="btn btn-primary" type="submit_button" id="submit_button" value="Submit" onclick="myFunction()">Submit</button> -->
+      <button type ="submit" id='Submit' name='Submit' value="Submit" style="width: 125 px" class ="btn btn-primary", onclick="js_add_course()">Submit</button>
+  </form>  
+
+
+  {% endblock %}
+
+
+
+
+
+

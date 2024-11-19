@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<h1><small>BlackBox</small></h1>
+{% from "includes/_formhelpers.html" import render_field %}
+<form action="" method="POST" >
+  <div class="form-group">
+    <br>
+    {{render_field(form.name, class_="form-control", placeholder="Name field should contain 3-10 characters (Only letetrs)")}}
+  </div>
+  <div class="form-group">
+    <br>
+    {{render_field(form.address, class_="form-control", placeholder="Address field should be alphanumeric, max 50 characters")}}
+  </div>
+  <div class="form-group">
+    <br>
+    {{render_field(form.phone, class_="form-control", placeholder="Phone Number field should accept only numbers, min 8, max 10 characters")}}
+  </div>
+  <button type ="submit" name='Check' value="Check" style="width: 125 px" class ="btn btn-primary">Check</button>
+  <button type ="submit" name='Reset' value="Reset" style="width: 125 px" class ="btn btn-primary">Reset</button>
+</form>
+{% endblock %}

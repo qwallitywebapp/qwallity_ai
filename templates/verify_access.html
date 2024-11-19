@@ -1,0 +1,24 @@
+{% extends 'layout_enter.html' %}
+
+  {% block body %}
+  <h1><small>Enter to Qwallity app</small></h1>
+  <p><span class="lt-line-clamp__raw-line">&nbsp; &nbsp; &bull; Input email which you provide to Qwallity team and security code. </span></p>
+
+  {% from "includes/_formhelpers.html" import render_field %}
+  <form method="POST" action="">
+
+    <div class="form-group">
+      {{render_field(form.email,class_="form-control-sm")}}
+    </div>
+    <div class="form-group">
+      {{render_field(form.code,class_="form-control-sm")}}
+    </div>
+    <button type ="submit" id='Send' name='Send' value="Send" style="width: 75 px" class ="btn btn-primary">Send</button>
+  
+  </form>
+  {% endblock %}
+
+
+
+
+

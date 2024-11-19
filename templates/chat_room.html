@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Chat Room</title>
+  <!--Link to CSS -->
+  <!-- <link href="../static/bootstrap.min.css" rel="stylesheet"> -->
+  <!-- <link href="../static/styles/style.css" rel="stylesheet"> -->
+</head>
+
+
+<body class="text-center">
+  <form class="form-signin" action="{{url_for('chat')}}" method="POST">
+    <h1 class="h2 mb-3 font-weight-normal">Select Room</h1><br><br>
+  <div class="col-sm-4 col-lg-4 col-md-4">
+    <select title="thing" class="form-control" id="myselect" name="thing" required>
+      <option value="general" name="general" id="general" >general</option>
+      <option value="funny" name="funny" id="funny" >funny</option>
+      <option value="technical" name="technical" id="technical" >technical</option>
+    </select>
+    <br>
+    <button class="btn btn-lg btn-primary btn-block" value="submit">Start Chat</button>
+  </form>
+</body>
+
+</html>
+{% endblock %}

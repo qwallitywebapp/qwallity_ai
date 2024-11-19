@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script src="/static/my.js"></script>
+<h1><small>Calculator</small></h1>
+{% from "includes/_formhelpers.html" import render_field %}
+ 
+<form name='myform' action="" method="POST"  >
+  <div class="form-group" onmousemove="return validateform()">
+    {{render_field(form.number1, class_="form-control")}}
+  </div>
+  <span class="error" id="errornumber1"></span></p>
+  <div class="form-group" onmousemove="return validateform()">
+    {{render_field(form.number2, class_="form-control")}}
+    <span class="error" id="errornumber2"></span></p>
+  </div>
+  <label>Operations</label>
+  <div class="col-sm-4 col-lg-4 col-md-4">
+    <select title="thing" class="form-control" id="myselect" name="thing" required>
+      <option value="addition" name="addition" id="addition" {% if thing =="addition" %} selected {% endif %} >addition</option>
+      <option value="subtraction" name="subtraction" id="subtraction" {% if thing =='subtraction' %} selected {% endif %}>subtraction</option>
+      <option value="multiplication" name="multiplication" id="multiplication" {% if thing =="multiplication" %} selected {% endif %} >multiplication</option>
+      <option value="division" name="division" id="division" {% if thing =='division' %} selected {% endif %}>division</option>
+  </select>
+  <br>
+  <p>Result: <output name="result" value={{output}}>{{output}}</output></p>
+  <br>
+  <button type ="submit" id='Calculate' name='Calculate' value="Calculate" style="width: 125 px" class ="btn btn-primary", onsubmit="return clearfield()">Calculate</button>
+  <button type ="submit" name='Reset' value="Reset" style="width: 125 px" class ="btn btn-primary">Reset</button>
+</form>
+{% endblock %}

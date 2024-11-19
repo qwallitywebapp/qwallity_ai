@@ -1,0 +1,233 @@
+/* Applies to the entire body of the HTML document (except where overridden by more specific
+selectors). */
+
+/* Applies to all elements with <... class="someclass"> specified. */
+.help-inline { color: red; }
+
+/* Applies to the element with <... id="someid"> specified. */
+#someid { color: green; }
+
+/* Parent Container */
+.content_img{
+  position: relative;
+  width: 50px;
+  height: 30px;
+  float: left;
+  margin-right: 10px;
+}
+
+/* Child Text Container */
+.content_img div{
+  position: relative;
+  bottom: 0;
+  right: 0;
+  background: None;
+  color: rgb(209, 88, 7);
+  margin-bottom: 5px;
+  font-family: sans-serif;
+  opacity: 0;
+  visibility: hidden;
+  -webkit-transition: visibility 0s, opacity 0.3s linear;  
+  transition: visibility 0s, opacity 0.7s linear;
+}
+
+/* Hover on Parent Container */
+.content_img:hover{
+  cursor: pointer;
+}
+.content_img:hover div{
+  width: 150px;
+  padding: 8px 15px;
+  visibility: visible;
+  opacity: 0.7;        
+}
+.users_list option{
+  width:15px;   
+ }
+
+.required:after {
+  content:" *";
+  color: red;
+}
+/* Split the screen in half */
+.split {
+  height: 100%;
+  width: 50%;
+  position: fixed;
+  z-index: 1;
+  overflow-x: hidden;
+  padding-top: 40px;
+}
+
+/* Control the left side */
+.left {
+  left:150px;
+}
+
+/* Control the right side */
+.right {
+  right:30px;
+  top: 160px;
+
+}
+
+/* If you want the content centered horizontally and vertically */
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+/* Style the image inside the centered container, if needed */
+.centered img {
+  width: 150px;
+  border-radius: 50%;
+}
+
+.floatRight {
+  float:left;
+  clear:left;
+  margin-left:-300px
+}
+
+/* Overall Chat Window Styles */
+#chat-popup {
+  display: flex;
+  flex-direction: column;
+  max-height: 400px;
+  width: 300px;
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: none; /* Initially hidden */
+  flex-direction: column;
+  max-height: 400px;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+
+/* Chat Header */
+.chat-header {
+  background-color: #c9774e;
+  padding: 10px;
+  color: #fff;
+  font-weight: 600;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 10px 10px 0 0;
+}
+
+.chat-header h5 {
+  margin: 0;
+}
+
+.chat-toggle {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Chat Box */
+#chat-box {
+  flex-grow: 1;  /* Позволяет этому блоку расширяться, занимая доступное пространство */
+  overflow-y: auto;  /* Добавляет вертикальную прокрутку, если содержимое превышает высоту */
+  padding: 10px;
+}
+
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* Chat Messages */
+.message {
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 80%;
+  word-wrap: break-word;
+  font-size: 14px;
+  line-height: 1.4; /* Improves readability */
+}
+
+.message.user {
+  background-color: #e1f5fe;
+  align-self: flex-end;
+  color: #333;
+}
+
+.message.bot {
+
+  overflow-y: auto;
+  background-color: #f1f1f1;
+  align-self: flex-start;
+  color: #333;
+}
+
+/* Chat Footer */
+.chat-footer {
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f7f7f7;
+  border-radius: 0 0 10px 10px;
+  position: sticky;
+  bottom: 0; /* Закрепляет футер внизу окна чата */
+  min-height: 60px;
+  width: 100%;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Легкая тень для разделения футера */
+}
+
+.chat-footer input {
+  width: 80%;
+  padding: 8px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.chat-footer button {
+  background-color: #c9774e;
+  border: none;
+  padding: 10px;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.chat-footer button:hover {
+  background-color: #b0663e;
+}
+
+/* Toggle Button for Chat Window */
+.chat-toggle {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background-color: #c9774e;
+  color: white;
+  border-radius: 50%;
+  padding: 15px;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.chat-toggle:hover {
+  background-color: #b0663e;
+}

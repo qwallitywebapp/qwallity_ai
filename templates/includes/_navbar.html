@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/style.css') }}">
+    <title>My Website</title>
+    <style>
+        .hide {
+            display: none;
+        }
+
+        .myDIV:hover + .hide {
+            display: block;
+            color: rgb(50, 63, 122);
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+        <h5 class="my-0 mr-md-auto font-weight-normal">
+            <img src="/static/logo.jpg" width="120" height="100" style="vertical-align:top">
+        </h5>
+        <nav class="my-2 my-md-0 mr-md-3">
+            <a class="p-2 text-dark" href="/home">Home</a>
+            <a class="p-2 text-dark" href="/about">About us</a>
+            <a class="p-2 text-dark" href="/courses">Courses</a>
+            <a class="btn btn-primary" href="/exercises">Exercises</a>
+            <a class="btn btn-primary" href="/docs">Documentation</a>
+        </nav>
+
+        <a class="btn btn-outline-primary" href="/mycourses" id="my_courses">MyCourses</a>
+        <a class="btn btn-outline-primary" href="/user_action" id="user_action">User_Action</a>
+        <a class="btn btn-outline-primary" href="/user_action_admin" id="user_action_admin">User_Action_Admin</a>
+        <a class="btn btn-outline-primary" href="/profile" id="profile">{{ session.username }}</a>
+        <a class="btn btn-outline-primary" href="/weather" id="weather">Weather1</a>
+        <a class="btn btn-outline-primary" href="/logout" id="logout" onclick="js_remove_token()">Logout</a>
+        
+        <a class="btn btn-outline-primary" href="/register" style="width:10%" id="nav_register">Register</a>
+        <a class="btn btn-outline-primary" href="/login" style="width:10%" id="nav_login">Login</a>
+    </div>
+
+    <div class="content_img">
+        <div class="weather-container">
+            <div id="weather"></div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
+        
+        if (!token) { // Check if token is null or empty
+            document.getElementById("my_courses").style.display = "none";
+            document.getElementById("user_action").style.display = "none";
+            document.getElementById("user_action_admin").style.display = "none";
+            document.getElementById("profile").style.display = "none";
+            document.getElementById("weather").style.display = "none";
+            document.getElementById("logout").style.display = "none";
+   
+        } else {
+            document.getElementById("profile").textContent = payload['username'];
+            localStorage.setItem('username', payload['username']);
+            document.getElementById("nav_register").style.display = "none";
+            document.getElementById("nav_login").style.display = "none";
+            if (payload.role === 2) { // Regular user
+            document.getElementById("user_action_admin").style.display = "none"; // Hide admin action
+        } else if (payload.role === 1) { // Admin
+            document.getElementById("user_action").style.display = "none"; // Hide user action
+        }
+        }
+ 
+
+        function js_remove_token() {
+            localStorage.removeItem('token'); // Remove the token from local storage
+            window.location.reload(); // Reload the page to reflect changes
+        }
+    </script>
+</body>
+</html>

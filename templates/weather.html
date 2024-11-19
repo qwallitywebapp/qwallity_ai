@@ -1,0 +1,66 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+  <link rel="stylesheet" href="/static/styles/weather.css" />
+      <div class="container" >
+          <div class="columns">
+              <div class="column is-offset-1 is-3">
+                      <div class="field has-addons">
+                          <div class="control is-expanded">
+                     
+                              <input id= "city" class="input" type="text" placeholder="Get Weather">
+                          </div>
+                          <div class="control">
+                              <button id = "get_weather" class="button is-info", onclick="getWeather()">
+                                  Get Weather
+                              </button>
+                              <script>
+                                var input = document.getElementById("city");
+                                // Execute a function when the user presses a key on the keyboard
+                                input.addEventListener("keypress", function(event) {
+                                // If the user presses the "Enter" key on the keyboard
+                                if (event.key === "Enter") {
+                                    // Cancel the default action, if needed
+                                    event.preventDefault();
+                                    // Trigger the button element with a click
+                                    document.getElementById("get_weather").click();
+                                }
+                                });
+                              </script>
+                          </div>
+                      </div>
+              </div>
+          </div>
+        </div>
+      </div>
+      <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-offset-3 is-5">
+                    <div class="box">
+                        <article class="media">
+                            <div class="media-left">
+                                <figure class="image is-50x50">
+                                    <img src="http://openweathermap.org/img/w/10d.png" alt="Image">
+                                </figure>
+                            </div>
+                            <div class="media-content">
+                                <div class="content">
+                                    <p>
+                                        <span id ='city_name' class="title"></span>
+                                        <br>
+                                        <span id = 'city_temp'class="subtitle"></span>
+                                        <br>
+                                        <span id = 'descr'class="subtitle"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
