@@ -36,6 +36,9 @@
   </div>
   <div id="chat-box" class="chat-box" style="padding: 10px; flex-grow: 1; overflow-y: auto; max-height: 300px;">
       <div id="chat-messages" class="chat-messages" style="display: flex; flex-direction: column; gap: 10px;">
+        <div id="loading-spinner" style="display: none; text-align: center; margin-top: 10px;">
+          <img src="/static/spinner.gif" alt="Loading..." width="30" height="30">
+        </div>
         <img id='robot_img' src="/static/robot.png" width="120" height="100" style="vertical-align:center">
         <div id="greeting-message"  style="color: #210240;">Hi! How can I assist you today?</div>
 
@@ -114,23 +117,29 @@ document.getElementById("send-button").onclick = function () {
     // Clear the input field
     document.getElementById("user-input").value = "";
 
+    // Show loading spinner
+    document.getElementById("loading-spinner").style.display = "block";
+
     // Call the backend API to get the response
     axios.post('/api/chat', { message: userInput })
       .then(response => {
+        // Hide the loading spinner once the response is received
+        document.getElementById("loading-spinner").style.display = "none";
+        
+        // Display the bot's message in the chat window
         var botMessage = document.createElement("div");
         botMessage.classList.add("message", "bot");
         botMessage.textContent = response.data.answer;
         chatMessages.appendChild(botMessage);
 
-        function scrollToBottom() {
-      const chatMessages = document.querySelector('.message bot');
-      setTimeout(() => {
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-      }, 0); // небольшая задержка
-  }
+        // Scroll to the bottom of the chat
+        chatMessages.scrollTop = chatMessages.scrollHeight;
       })
       .catch(error => {
         console.error("Error sending message to backend:", error);
+
+        // Hide the loading spinner in case of an error
+        document.getElementById("loading-spinner").style.display = "none";
       });
   }
 };
