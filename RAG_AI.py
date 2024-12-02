@@ -10,11 +10,6 @@ openai_key = os.getenv('api_key')
 openai.api_key = openai_key
 
 
-# Create a unique session ID for each interaction or user session
-def create_session_id():
-    return str(uuid.uuid4())  # Generates a new unique session ID
-
-
 # Get content from .md files
 def load_markdown_files(directory):
     documents = []
@@ -86,7 +81,7 @@ def generate_answer(question):
 
 # Add the conversation history and the new prompt to the API call
     response = openai.ChatCompletion.create(
-        model="gpt-4",  # Or "gpt-3.5-turbo" for a cheaper alternative
+        model="gpt-4o",  # Or "gpt-3.5-turbo" for a cheaper alternative
         messages=[
             {"role": "system", "content": "You are a helpful assistant."}
         ] + conversation_history + [{"role": "user", "content": prompt}],  # Correctly combine the lists

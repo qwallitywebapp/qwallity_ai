@@ -5,6 +5,9 @@
 <script>
   // Retrieve the stored name from local storage
   var username = localStorage.getItem("username");
+  if(username === null){
+    username = 'Guest'
+  }
   document.getElementById('welcome_text').textContent = 'Welcome ' + username + '!';
 </script>
 <br>
@@ -31,7 +34,7 @@
 <!-- Chat Window -->
 <div id="chat-popup" class="chat-popup" style="position: fixed; bottom: 10px; right: 10px; width: 300px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: none; flex-direction: column; max-height: 400px; overflow: hidden;">
   <div class="chat-header" style="background-color: #c9774e; padding: 10px; color: #fff; font-weight: 600; font-family: Arial, sans-serif; display: flex; justify-content: space-between; align-items: center; border-radius: 10px 10px 0 0;">
-    <h5 style="margin: 0;">Ask AI</h5>
+    <h5 style="margin: 0;">Qwallity AI</h5>
     <button id="close-chat" style="background: none; border: none; font-size: 20px; color: #fff; cursor: pointer;">X</button> 
   </div>
   <div id="chat-box" class="chat-box" style="padding: 10px; flex-grow: 1; overflow-y: auto; max-height: 300px;">
@@ -40,7 +43,7 @@
           <img src="/static/spinner.gif" alt="Loading..." width="30" height="30">
         </div>
         <img id='robot_img' src="/static/robot.png" width="120" height="100" style="vertical-align:center">
-        <div id="greeting-message"  style="color: #210240;">Hi! How can I assist you today?</div>
+        <div id="greeting-message"  style="color: #210240;">Hi! How can I help you?</div>
 
         <!-- Chat messages will appear here -->
       </div>
