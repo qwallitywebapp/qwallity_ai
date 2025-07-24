@@ -30,6 +30,42 @@
 </table>
 
 <!-- Chat Popup HTML Code -->
+<style>
+#chat-popup {
+  width: 600px !important;
+  min-height: 500px;
+  max-height: 80vh;
+  position: fixed;
+  bottom: 40px;
+  left: 40px;
+  background: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 999;
+  display: none;
+  border-radius: 12px;
+  padding: 0;
+}
+#chat-box {
+  width: 100%;
+  height: 350px;
+  overflow-y: auto;
+  padding: 16px;
+  box-sizing: border-box;
+}
+#chat-messages {
+  width: 100%;
+  min-height: 320px;
+  max-height: 320px;
+  overflow-y: auto;
+  font-size: 1.1em;
+  margin-bottom: 10px;
+}
+#user-input, #user-prompt {
+  width: 98%;
+  font-size: 1.1em;
+}
+</style>
 <div id="chat-popup" class="chat-popup">
   <div id="chat-box" class="chat-box">
     <div id="chat-messages" class="chat-messages">

@@ -1,14 +1,13 @@
 import os
-import openai
 import faiss
 import numpy as np
 import uuid  # For generating a unique session ID
 from dotenv import load_dotenv
+import google.generativeai as genai
 
-load_dotenv('data.env')
-openai_key = os.getenv('api_key')
-openai.api_key = openai_key
-
+load_dotenv()
+gemini_api_key = os.getenv('GEMINI_API_KEY')
+genai.configure(api_key=gemini_api_key)
 
 # Get content from .md files
 def load_markdown_files(directory):
@@ -19,12 +18,15 @@ def load_markdown_files(directory):
             documents.append((filename, content))
     return documents
 
-
-# Convert text to embeddings
+# Convert text to embeddings using Gemini
+# Gemini's embedding model is 'models/embedding-001'
 def create_embedding(text):
-    response = openai.Embedding.create(input=text, model="text-embedding-ada-002")
-    return np.array(response['data'][0]['embedding'])
-
+    response = genai.embed_content(
+        model="models/embedding-001",
+        content=text,
+        task_type="retrieval_document"
+    )
+    return np.array(response['embedding'])
 
 # Load markdown files and create embeddings
 directory = "./qwallity_app_doc-pkg/docs"
@@ -46,7 +48,6 @@ file_names = [filename for filename, _ in documents]
 # Global variable to store conversation history
 conversation_history = []
 
-
 def search_documents(question, k=3, relevance_threshold=0.67):  # k=3 to get the top 3 closest document embeddings to a query embedding.
     # Generate embedding for the query
     query_embedding = create_embedding(question).astype("float32").reshape(1, -1)
@@ -62,38 +63,53 @@ def search_documents(question, k=3, relevance_threshold=0.67):  # k=3 to get the
     return results
 
 
-def generate_answer(question):
+def generate_answer(question, user_promtp=None):
     # Search for the top k documents relevant to the question
     top_documents = search_documents(question, k=3)
     # Retrieve the content of the top documents (doc[1] is the content)
-    relevant_texts = [doc[1] for doc in top_documents]
+    relevant_texts = [doc[1] for doc in top_documents] if top_documents else []
     combined_text = "\n\n".join(relevant_texts)
     # Maintain conversation history: Append the new question and relevant documents to the history
     conversation_history.append({"role": "user", "content": question})
     conversation_history.append({"role": "assistant", "content": combined_text})
-    if top_documents is None:
-        prompt = f"Question: {question}"
+
+
+    if user_promtp:
+        prompt = f"Using {user_promtp} answer on {question} Here are some relevant documents that may help answer the question:\n{combined_text}"
     else:
-        # Create the prompt to send to OpenAI for generating an answer
-        prompt = f"Question: {question}\n\n" \
-            f"Here are some relevant documents that may help answer the question:\n{combined_text}\n\n" \
-            f"Based on the above documents, please provide a concise, accurate answer to the question above."
+        # Create the prompt to send to Gemini for generating an answer
+        prompt = (
+            f"Question: {question}\n\n"
+            f"Here are some relevant documents that may help answer the question:\n{combined_text}\n\n"
+            f"Instructions:\n"
+            f"- Provide a concise and accurate answer **based only on the above documents**.\n"
+            f"- If the question is a greeting (e.g., 'Hi', 'Hello', 'Good morning'), respond politely.\n"
+            f"- If the question is unrelated to the application or cannot be answered using the provided documents, respond with:\n"
+            f"  'Sorry, I can only answer questions related to the Qwallity application based on the provided information.'"
+        )
+    # 1. System message
+    gemini_messages = [
+        {"role": "user", "parts": ["You are a helpful assistant."]}
+    ]
 
-# Add the conversation history and the new prompt to the API call
-    response = openai.ChatCompletion.create(
-        model="gpt-4o",  # Or "gpt-3.5-turbo" for a cheaper alternative
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."}
-        ] + conversation_history + [{"role": "user", "content": prompt}],  # Correctly combine the lists
-        max_tokens=200,  # Limit the response length
-        temperature=0.5,  # Controls the randomness of the output
+    # 2. Add conversation history
+    for entry in conversation_history:
+        if entry["role"] == "user":
+            gemini_messages.append({"role": "user", "parts": [entry["content"]]})
+        elif entry["role"] == "assistant":
+            gemini_messages.append({"role": "model", "parts": [entry["content"]]})
+
+    # 3. Add the new prompt as the last user message
+    gemini_messages.append({"role": "user", "parts": [prompt]})
+
+    # 4. Generate answer
+    model = genai.GenerativeModel('models/gemini-1.5-pro')
+    response = model.generate_content(
+        gemini_messages,
+        generation_config={"max_output_tokens": 200, "temperature": 0.5}
     )
-
-    # Extract the generated answer from the response
-    answer = response['choices'][0]['message']['content'].strip()
-    # Update the conversation history with the new response
+    answer = response.text.strip()
     conversation_history.append({"role": "assistant", "content": answer})
-
     return answer
 
 

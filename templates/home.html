@@ -3,7 +3,6 @@
 {% block body %}
 <h1><div id="welcome_text"></div></h1>
 <script>
-  // Retrieve the stored name from local storage
   var username = localStorage.getItem("username");
   if(username === null){
     username = 'Guest'
@@ -31,134 +30,214 @@
   {% endfor %}
 </table>
 
-<!-- Chat Window -->
-<div id="chat-popup" class="chat-popup" style="position: fixed; bottom: 10px; right: 10px; width: 300px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: none; flex-direction: column; max-height: 400px; overflow: hidden;">
-  <div class="chat-header" style="background-color: #c9774e; padding: 10px; color: #fff; font-weight: 600; font-family: Arial, sans-serif; display: flex; justify-content: space-between; align-items: center; border-radius: 10px 10px 0 0;">
-    <h5 style="margin: 0;">Qwallity AI</h5>
-    <button id="close-chat" style="background: none; border: none; font-size: 20px; color: #fff; cursor: pointer;">X</button> 
-  </div>
-  <div id="chat-box" class="chat-box" style="padding: 10px; flex-grow: 1; overflow-y: auto; max-height: 300px;">
-      <div id="chat-messages" class="chat-messages" style="display: flex; flex-direction: column; gap: 10px;">
-        <div id="loading-spinner" style="display: none; text-align: center; margin-top: 10px;">
-          <img src="/static/spinner.gif" alt="Loading..." width="30" height="30">
-        </div>
-        <img id='robot_img' src="/static/robot.png" width="120" height="100" style="vertical-align:center">
-        <div id="greeting-message"  style="color: #210240;">Hi! How can I help you?</div>
-
-        <!-- Chat messages will appear here -->
-      </div>
-  </div>
-  <div class="chat-footer">
-    <textarea id="user-input" placeholder="Type a message..." 
-    style="width: 80%; padding: 8px; border-radius: 20px; border: 1px solid rgb(221, 221, 221); font-size: 14px; min-height: 40px; resize: none; overflow: hidden;"></textarea>
-   <button id="send-button" style="background-color: #c9774e; border: none; padding: 10px; border-radius: 20px; color: white; cursor: pointer; font-size: 14px;">Send</button>     
-  </div>
-</div>
-
-<!-- Floating Toggle Button for Chat Window -->
+<!-- Chat Button -->
 <button id="chat-toggle" class="chat-toggle" style="position: fixed; bottom: 10px; right: 10px; background-color: #c9774e; color: white; border-radius: 50%; padding: 15px; font-size: 20px; border: none; cursor: pointer;">💬</button>
 
-<!-- Add Axios -->
+<!-- Chat Popup -->
+<div id="chat-popup" class="chat-popup" style="position: fixed; bottom: 10px; right: 10px; width: 900px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: none; flex-direction: column; max-height: 400px; overflow: hidden;">
+
+  <div class="chat-header" style="background-color: #c9774e; padding: 10px; color: #fff; font-weight: 600; font-family: Arial, sans-serif; display: flex; justify-content: space-between; align-items: center; border-radius: 10px 10px 0 0;">
+    <h5 style="margin: 0;">Qwallity Chatbot</h5>
+    <div>
+      <button id="clear-chat" title="Clear chat history" style="background: none; border: none; font-size: 16px; color: #fff; cursor: pointer; margin-right: 10px;">🗑️</button>
+      <button id="close-chat" style="background: none; border: none; font-size: 20px; color: #fff; cursor: pointer;">X</button> 
+    </div>
+  </div>
+
+  <div id="chat-box" class="chat-box" style="padding: 10px; flex-grow: 1; overflow-y: auto; max-height: 150px;">
+    <div id="chat-messages" class="chat-messages">
+      <div id="loading-spinner" style="display: none; text-align: center; margin-top: 10px;">
+        <img src="/static/spinner.gif" alt="Loading..." width="30" height="30">
+      </div>
+      <img id='robot_img' src="/static/robot.png" width="120" height="100" style="vertical-align:center">
+      <div id="greeting-message" style="color: #210240;">Hi! How can I help you?</div>
+      <!-- Dynamic messages will be appended here -->
+    </div>
+  </div>
+  <div class="chat-footer" style="display: flex; gap: 8px; padding: 10px; align-items: flex-start; border-top: 1px solid #eee; flex-wrap: wrap;">
+    <div id="input-container" style="display: flex; gap: 8px; flex-grow: 1; width: 100%;">
+      <textarea id="user-input" placeholder="Type a message..." style=" width: 50%; padding: 8px; border-radius: 20px; border: 1px solid #ddd; font-size: 14px; min-height: 60px; resize: none; overflow: hidden;"></textarea>
+  
+      <div id="prompt-container" style="width: 50%; position: relative;">
+        <textarea id="user-prompt" placeholder="Type your prompt..." style="width: 100%; padding: 8px 30px 8px 8px; border-radius: 20px; border: 1px solid #ddd; font-size: 14px; min-height: 60px; resize: none; overflow: hidden;"></textarea>
+        <button id="clear-prompt" title="Clear prompt" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 16px; color: #888; cursor: pointer;">✕</button>
+        <button id="save-prompt" title="Save prompt"
+        style="position: absolute; top: 8px; right: 25px; background: none; border: none; font-size: 16px; color: #888; cursor: pointer;">💾</button>
+      </div>
+    </div>
+  
+    <div style="display: flex; gap: 8px;">
+      <button id="send-button" style="background-color: #c9774e; border: none; padding: 10px 16px; border-radius: 20px; color: white; cursor: pointer; font-size: 14px;">Send</button>
+  
+      <button id="toggle-prompt" title="Toggle prompt visibility" style="background-color: #f0f0f0; border: none; padding: 10px 16px; border-radius: 20px; color: #333; cursor: pointer; font-size: 14px;">
+        🎛️ Prompt Input
+      </button>
+    </div>
+  </div>
+
+<!-- Axios -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-<script>
-        const textarea = document.getElementById('user-input');
-
-// Функция для автоматического изменения размера
-function autoResize() {
-    textarea.style.height = 'auto'; // Сбрасываем высоту
-    textarea.style.height = (textarea.scrollHeight) + 'px'; // Устанавливаем высоту в зависимости от содержимого
+<!-- Styles for chat messages -->
+<style>
+.message.bot {
+  align-self: flex-start;
+  background: #fffbe6;
+  color: #210240;
+  padding: 10px 16px;
+  border-radius: 16px 16px 16px 4px;
+  max-width: 80%;
+  font-size: 15px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin: 5px 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
+.message.user {
+  align-self: flex-end;
+  background: #d4eaff;
+  color: #003366;
+  padding: 10px 16px;
+  border-radius: 16px 16px 4px 16px;
+  max-width: 80%;
+  font-size: 15px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin: 5px 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+}
+</style>
 
-// Добавляем обработчик события на ввод
+<!-- JS Logic -->
+<script>
+const textarea = document.getElementById('user-input');
+function autoResize() {
+  textarea.style.height = 'auto';
+  textarea.style.height = (textarea.scrollHeight) + 'px';
+}
 textarea.addEventListener('input', autoResize);
-
-// Вызываем функцию для начальной установки
 autoResize();
-// Toggle chat window visibility
+
 document.getElementById("chat-toggle").onclick = function () {
-  var chatPopup = document.getElementById("chat-popup");
-  var chatToggle = document.getElementById("chat-toggle");
-
-  if (chatPopup.style.display === "block") {
-    chatPopup.style.display = "none";
-    chatToggle.style.display = "block"; // Show the chat icon when chat is closed
-  } else {
-    chatPopup.style.display = "block";
-    chatToggle.style.display = "none"; // Hide the chat icon when chat is open
-  }
+  const chatPopup = document.getElementById("chat-popup");
+  const chatToggle = document.getElementById("chat-toggle");
+  chatPopup.style.display = "block";
+  chatToggle.style.display = "none";
 };
 
-// Close chat window when the close button is clicked
 document.getElementById("close-chat").onclick = function () {
-  var chatPopup = document.getElementById("chat-popup");
-  var chatToggle = document.getElementById("chat-toggle");
-  chatPopup.style.display = "none";
-  chatToggle.style.display = "block"; // Show the chat icon when chat is closed
+  document.getElementById("chat-popup").style.display = "none";
+  document.getElementById("chat-toggle").style.display = "block";
 };
 
-// Send message function
 document.getElementById("send-button").onclick = function () {
-  var userInput = document.getElementById("user-input").value;
+  const userInput = document.getElementById("user-input").value;
+  const userPrompt = document.getElementById("user-prompt").value;
+
   if (userInput.trim() !== "") {
-    // Display user message in the chat window
-    var chatMessages = document.getElementById("chat-messages");
-    var userMessage = document.createElement("div");
+    const chatMessages = document.getElementById("chat-messages");
+
+    const userMessage = document.createElement("div");
     userMessage.classList.add("message", "user");
     userMessage.textContent = userInput;
     chatMessages.appendChild(userMessage);
 
-    // Remove the greeting message after the first message is sent
-    var greetingMessage = document.getElementById("greeting-message");
-    var greetingRobot = document.getElementById("robot_img");
-
-    if (greetingMessage) {
-      greetingMessage.style.display = "none";  // Hide the greeting message
-      greetingRobot.style.display = "none"; // Hide the greeting image
-    }
-
-    // Clear the input field
+    document.getElementById("greeting-message").style.display = "none";
+    document.getElementById("robot_img").style.display = "none";
     document.getElementById("user-input").value = "";
-
-    // Show loading spinner
     document.getElementById("loading-spinner").style.display = "block";
 
-    // Call the backend API to get the response
-    axios.post('/api/chat', { message: userInput })
+    axios.post('/api/chat', { message: userInput, prompt: userPrompt })
       .then(response => {
-        // Hide the loading spinner once the response is received
         document.getElementById("loading-spinner").style.display = "none";
-        
-        // Display the bot's message in the chat window
-        var botMessage = document.createElement("div");
+        const botMessage = document.createElement("div");
         botMessage.classList.add("message", "bot");
         botMessage.textContent = response.data.answer;
         chatMessages.appendChild(botMessage);
-
-        // Scroll to the bottom of the chat
         chatMessages.scrollTop = chatMessages.scrollHeight;
       })
       .catch(error => {
-        console.error("Error sending message to backend:", error);
-
-        // Hide the loading spinner in case of an error
         document.getElementById("loading-spinner").style.display = "none";
+        console.error("Error:", error);
       });
   }
 };
 
-// Send message when 'Enter' is pressed (without Shift + Enter)
 document.getElementById("user-input").addEventListener("keypress", function (event) {
   if (event.key === "Enter" && !event.shiftKey) {
-    event.preventDefault();  // Prevent new line on Enter
-    document.getElementById("send-button").click();  // Trigger the send button click
+    event.preventDefault();
+    document.getElementById("send-button").click();
   }
 });
 
-// Auto-expand the textarea as the user types
-document.getElementById("user-input").addEventListener('input', function () {
-  this.style.height = 'auto';  // Reset height
-  this.style.height = (this.scrollHeight) + 'px';  // Set height to scrollHeight (content height)
+document.getElementById('clear-chat').onclick = () => {
+  const chatMessages = document.getElementById('chat-messages');
+  [...chatMessages.querySelectorAll('.message.user, .message.bot')].forEach(el => el.remove());
+  document.getElementById("greeting-message").style.display = "block";
+  document.getElementById("robot_img").style.display = "inline-block";
+  chatMessages.scrollTop = 0;
+};
+
+document.getElementById('clear-prompt').onclick = () => {
+  localStorage.removeItem('userPrompt');
+  document.getElementById('user-prompt').value = '';
+  sessionStorage.removeItem('promptSent');
+};
+
+document.getElementById('toggle-prompt').onclick = function () {
+  const promptContainer = document.getElementById('prompt-container');
+  const userInput = document.getElementById('user-input');
+
+  if (promptContainer.style.display === 'none') {
+    promptContainer.style.display = 'block';
+    userInput.style.width = '40%';
+  } else {
+    promptContainer.style.display = 'none';
+    userInput.style.width = 'calc(100% - 10px)'; // full width minus small gap
+  }
+};
+function autoResizeTextarea(textarea) {
+  textarea.style.height = 'auto'; // Reset height
+  textarea.style.height = textarea.scrollHeight + 'px'; // Set to scroll height
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const userInput = document.getElementById('user-input');
+  const userPrompt = document.getElementById('user-prompt');
+
+  [userInput, userPrompt].forEach(textarea => {
+    if (!textarea) return;
+
+    // Expand initially if prefilled
+    autoResizeTextarea(textarea);
+
+    // Bind input event
+    textarea.addEventListener('input', () => autoResizeTextarea(textarea));
+  });
+});
+document.getElementById('save-prompt').onclick = () => {
+  const promptValue = document.getElementById('user-prompt').value.trim();
+  if (promptValue) {
+    localStorage.setItem('userPrompt', promptValue);
+    alert('Prompt saved!');
+  } else {
+    alert('Prompt is empty, nothing to save.');
+  }
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Existing autoResizeTextarea setup here ...
+
+  // Load saved prompt from localStorage, if any
+  const savedPrompt = localStorage.getItem('userPrompt');
+  if (savedPrompt) {
+    document.getElementById('user-prompt').value = savedPrompt;
+    autoResizeTextarea(document.getElementById('user-prompt')); // resize if needed
+  }
 });
 </script>
 
