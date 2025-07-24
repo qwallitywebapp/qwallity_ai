@@ -145,11 +145,13 @@ selectors). */
 }
 
 .chat-messages {
+  max-height: 300px; /* or whatever you want */
+  overflow-y: auto;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  word-wrap: break-word;
-  white-space: pre-wrap;
+  scroll-behavior: smooth;
 }
 
 /* Chat Messages */
@@ -169,11 +171,16 @@ selectors). */
 }
 
 .message.bot {
-
-  overflow-y: auto;
-  background-color: #f1f1f1;
   align-self: flex-start;
-  color: #333;
+  background: #fffbe6;
+  color: #210240;
+  padding: 10px 16px;
+  border-radius: 16px 16px 16px 4px;
+  max-width: 80%;
+  font-size: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  white-space: pre-wrap; /* this is important to wrap lines */
+  word-break: break-word;
 }
 
 /* Chat Footer */

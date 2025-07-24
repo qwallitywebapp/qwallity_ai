@@ -678,22 +678,19 @@ def chat_room():
 def get_weather():
     return render_template('weather.html')
 
-
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    # Get user message from request body
-    user_message = request.json.get('message')
+    data = request.json
+    user_message = data.get('message')
+    user_prompt = data.get('prompt', '')  # optional prompt, default empty string
 
     if not user_message:
         return jsonify({'error': 'No message provided'}), 400
 
-    try:
-        # Get the bot's response (assuming RAG_AI is your AI bot handler)
-        answer = RAG_AI.generate_answer(user_message)
-        return jsonify({'answer': answer})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    # Call generate_answer with separate question and user_prompt arguments
+    answer = RAG_AI.generate_answer(user_message, user_prompt)
 
+    return jsonify({'answer': answer})
 
 if __name__=='__main__':
     app.secret_key='secret'

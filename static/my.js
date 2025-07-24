@@ -255,3 +255,10 @@ function getWeather(){
     + descr.slice(1)
   }
 }
+
+window.onload = function () {
+  const savedPrompt = localStorage.getItem("userPrompt");
+  if (savedPrompt !== null) {
+    document.getElementById("user-prompt").value = savedPrompt;
+  }
+};
