@@ -31,10 +31,12 @@
 </table>
 
 <!-- Chat Button -->
-<button id="chat-toggle" class="chat-toggle" style="position: fixed; bottom: 10px; right: 10px; background-color: #c9774e; color: white; border-radius: 50%; padding: 15px; font-size: 20px; border: none; cursor: pointer;">💬</button>
+<button id="chat-toggle" class="chat-toggle" 
+  style="position: fixed; bottom: 10px; right: 10px; background-color: #c9774e; color: white; border-radius: 50%; padding: 15px; font-size: 20px; border: none; cursor: pointer;">💬
+</button>
 
 <!-- Chat Popup -->
-<div id="chat-popup" class="chat-popup" style="position: fixed; bottom: 10px; right: 10px; width: 900px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: none; flex-direction: column; max-height: 400px; overflow: hidden;">
+<div id="chat-popup" class="chat-popup" style="position: fixed; bottom: 10px; right: 10px; width: 900px; height: 600px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: none; flex-direction: column; overflow: hidden;">
 
   <div class="chat-header" style="background-color: #c9774e; padding: 10px; color: #fff; font-weight: 600; font-family: Arial, sans-serif; display: flex; justify-content: space-between; align-items: center; border-radius: 10px 10px 0 0;">
     <h5 style="margin: 0;">Qwallity Chatbot</h5>
@@ -44,41 +46,50 @@
     </div>
   </div>
 
-  <div id="chat-box" class="chat-box" style="padding: 10px; flex-grow: 1; overflow-y: auto; max-height: 150px;">
+  <div id="chat-box" class="chat-box" style="padding: 10px; flex-grow: 1; overflow-y: auto; max-height: 400px;">
     <div id="chat-messages" class="chat-messages">
       <div id="loading-spinner" style="display: none; text-align: center; margin-top: 10px;">
         <img src="/static/spinner.gif" alt="Loading..." width="30" height="30">
       </div>
       <img id='robot_img' src="/static/robot.png" width="120" height="100" style="vertical-align:center">
       <div id="greeting-message" style="color: #210240;">Hi! How can I help you?</div>
-      <!-- Dynamic messages will be appended here -->
     </div>
   </div>
-  <div class="chat-footer" style="display: flex; gap: 8px; padding: 10px; align-items: flex-start; border-top: 1px solid #eee; flex-wrap: wrap;">
-    <div id="input-container" style="display: flex; gap: 8px; flex-grow: 1; width: 100%;">
-      <textarea id="user-input" placeholder="Type a message..." style=" width: 50%; padding: 8px; border-radius: 20px; border: 1px solid #ddd; font-size: 14px; min-height: 60px; resize: none; overflow: hidden;"></textarea>
+
+  <div class="chat-footer" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; align-items: flex-start; border-top: 1px solid #eee; box-sizing: border-box;">
+          <textarea id="user-input" placeholder="Type a message..."
+        style="flex: 1 1 auto; min-height: 60px; max-height: 200px; overflow-y: auto; padding: 8px; border-radius: 20px; border: 1px solid #ddd; font-size: 14px; resize: none; line-height: 1.4;"></textarea>
   
-      <div id="prompt-container" style="width: 50%; position: relative;">
-        <textarea id="user-prompt" placeholder="Type your prompt..." style="width: 100%; padding: 8px 30px 8px 8px; border-radius: 20px; border: 1px solid #ddd; font-size: 14px; min-height: 60px; resize: none; overflow: hidden;"></textarea>
-        <button id="clear-prompt" title="Clear prompt" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 16px; color: #888; cursor: pointer;">✕</button>
-        <button id="save-prompt" title="Save prompt"
-        style="position: absolute; top: 8px; right: 25px; background: none; border: none; font-size: 16px; color: #888; cursor: pointer;">💾</button>
-      </div>
-    </div>
+    <div style="display: flex; gap: 8px; flex-shrink: 0;">
+      <button id="send-button"
+        style="background-color: #c9774e; border: none; padding: 10px 16px; border-radius: 20px; color: white; cursor: pointer; font-size: 14px;">
+        Send
+      </button>
   
-    <div style="display: flex; gap: 8px;">
-      <button id="send-button" style="background-color: #c9774e; border: none; padding: 10px 16px; border-radius: 20px; color: white; cursor: pointer; font-size: 14px;">Send</button>
-  
-      <button id="toggle-prompt" title="Toggle prompt visibility" style="background-color: #f0f0f0; border: none; padding: 10px 16px; border-radius: 20px; color: #333; cursor: pointer; font-size: 14px;">
+      <button id="toggle-prompt" title="Toggle prompt visibility"
+        style="background-color: #f0f0f0; border: none; padding: 10px 16px; border-radius: 20px; color: #333; cursor: pointer; font-size: 14px;">
         🎛️ Prompt Input
       </button>
     </div>
   </div>
+  
+  
+<!-- Prompt Edit Modal -->
+<dialog id="editPromptModal" style="width: 600px; padding: 0; border: none; border-radius: 8px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);">
+  <form method="dialog" style="padding: 20px;">
+    <h2>Edit System Prompt</h2>
+    <textarea id="systemPromptInput" rows="20" 
+    style="width: 100%; min-height: 200px; font-family: 'Poppins', sans-serif; font-size: 1rem; padding: 10px; border-radius: 6px; border: 1px solid #ccc;"></textarea>  
+    <div style="margin-top: 1rem; display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="submit" id="savePromptButton" style="background-color: #0f8e5f; border: none; padding: 10px 16px; border-radius: 20px; color: white; cursor: pointer; font-size: 14px;">Save</button>
+      <button type="button" id="cancelPromptButton" style="background-color: #c9774e; border: none; padding: 10px 16px; border-radius: 20px; color: white; cursor: pointer; font-size: 14px;">Cancel</button>
+    </div>
+  </form>
+</dialog>
 
 <!-- Axios -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-<!-- Styles for chat messages -->
 <style>
 .message.bot {
   align-self: flex-start;
@@ -112,31 +123,22 @@
 }
 </style>
 
-<!-- JS Logic -->
 <script>
-const textarea = document.getElementById('user-input');
-function autoResize() {
-  textarea.style.height = 'auto';
-  textarea.style.height = (textarea.scrollHeight) + 'px';
-}
-textarea.addEventListener('input', autoResize);
-autoResize();
+
 
 document.getElementById("chat-toggle").onclick = function () {
-  const chatPopup = document.getElementById("chat-popup");
-  const chatToggle = document.getElementById("chat-toggle");
-  chatPopup.style.display = "block";
-  chatToggle.style.display = "none";
+  document.getElementById("chat-popup").style.display = "flex";
+  this.style.display = "none";
 };
 
 document.getElementById("close-chat").onclick = function () {
   document.getElementById("chat-popup").style.display = "none";
-  document.getElementById("chat-toggle").style.display = "block";
+  document.getElementById("chat-toggle").style.display = "inline-block";
 };
 
 document.getElementById("send-button").onclick = function () {
   const userInput = document.getElementById("user-input").value;
-  const userPrompt = document.getElementById("user-prompt").value;
+  const savedPrompt = localStorage.getItem("userPrompt") || '';  // <-- Get system prompt from localStorage
 
   if (userInput.trim() !== "") {
     const chatMessages = document.getElementById("chat-messages");
@@ -149,21 +151,28 @@ document.getElementById("send-button").onclick = function () {
     document.getElementById("greeting-message").style.display = "none";
     document.getElementById("robot_img").style.display = "none";
     document.getElementById("user-input").value = "";
+    // Reset textarea to original size
+    const textarea = document.getElementById("user-input");
+    textarea.style.height = "60px";
     document.getElementById("loading-spinner").style.display = "block";
 
-    axios.post('/api/chat', { message: userInput, prompt: userPrompt })
-      .then(response => {
-        document.getElementById("loading-spinner").style.display = "none";
-        const botMessage = document.createElement("div");
-        botMessage.classList.add("message", "bot");
-        botMessage.textContent = response.data.answer;
-        chatMessages.appendChild(botMessage);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      })
-      .catch(error => {
-        document.getElementById("loading-spinner").style.display = "none";
-        console.error("Error:", error);
-      });
+    // Send both message and systemPromptInput to the backend
+    axios.post('/api/chat', {
+      message: userInput,
+      systemPromptInput: savedPrompt
+    })
+    .then(response => {
+      document.getElementById("loading-spinner").style.display = "none";
+      const botMessage = document.createElement("div");
+      botMessage.classList.add("message", "bot");
+      botMessage.textContent = response.data.answer;
+      chatMessages.appendChild(botMessage);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    })
+    .catch(error => {
+      document.getElementById("loading-spinner").style.display = "none";
+      console.error("Error:", error);
+    });
   }
 };
 
@@ -182,61 +191,50 @@ document.getElementById('clear-chat').onclick = () => {
   chatMessages.scrollTop = 0;
 };
 
-document.getElementById('clear-prompt').onclick = () => {
-  localStorage.removeItem('userPrompt');
-  document.getElementById('user-prompt').value = '';
-  sessionStorage.removeItem('promptSent');
-};
+document.getElementById('toggle-prompt').addEventListener('click', function () {
+  const dialog = document.getElementById('editPromptModal');
+  const savedPrompt = localStorage.getItem('userPrompt') || '';
+  document.getElementById('systemPromptInput').value = savedPrompt;
+  dialog.showModal();
+});
 
-document.getElementById('toggle-prompt').onclick = function () {
-  const promptContainer = document.getElementById('prompt-container');
-  const userInput = document.getElementById('user-input');
+document.getElementById('cancelPromptButton').addEventListener('click', function () {
+  document.getElementById('editPromptModal').close();
+});
 
-  if (promptContainer.style.display === 'none') {
-    promptContainer.style.display = 'block';
-    userInput.style.width = '40%';
-  } else {
-    promptContainer.style.display = 'none';
-    userInput.style.width = 'calc(100% - 10px)'; // full width minus small gap
-  }
-};
+document.getElementById('savePromptButton').addEventListener('click', function () {
+  const promptVal = document.getElementById('systemPromptInput').value.trim();
+  localStorage.setItem('userPrompt', promptVal);
+});
+
+// document.getElementById('editPromptModal').addEventListener('close', function () {
+//   const promptVal = document.getElementById('systemPromptInput').value.trim();
+//   if (promptVal) {
+//     localStorage.setItem('userPrompt', promptVal);
+//   }
+// });
+
 function autoResizeTextarea(textarea) {
-  textarea.style.height = 'auto'; // Reset height
-  textarea.style.height = textarea.scrollHeight + 'px'; // Set to scroll height
+  textarea.style.height = 'auto';
+  const newHeight = Math.max(textarea.scrollHeight, 60);
+  textarea.style.height = newHeight + 'px';
 }
 
 document.addEventListener('DOMContentLoaded', function () {
   const userInput = document.getElementById('user-input');
-  const userPrompt = document.getElementById('user-prompt');
+  const systemPromptInput = document.getElementById('systemPromptInput');
 
-  [userInput, userPrompt].forEach(textarea => {
-    if (!textarea) return;
-
-    // Expand initially if prefilled
-    autoResizeTextarea(textarea);
-
-    // Bind input event
-    textarea.addEventListener('input', () => autoResizeTextarea(textarea));
-  });
-});
-document.getElementById('save-prompt').onclick = () => {
-  const promptValue = document.getElementById('user-prompt').value.trim();
-  if (promptValue) {
-    localStorage.setItem('userPrompt', promptValue);
-    alert('Prompt saved!');
-  } else {
-    alert('Prompt is empty, nothing to save.');
+  // Auto-resize for user input
+  if (userInput) {
+    autoResizeTextarea(userInput);
+    userInput.addEventListener('input', () => autoResizeTextarea(userInput));
+    userInput.addEventListener('keydown', () => autoResizeTextarea(userInput));
   }
-};
 
-document.addEventListener('DOMContentLoaded', function () {
-  // Existing autoResizeTextarea setup here ...
-
-  // Load saved prompt from localStorage, if any
-  const savedPrompt = localStorage.getItem('userPrompt');
-  if (savedPrompt) {
-    document.getElementById('user-prompt').value = savedPrompt;
-    autoResizeTextarea(document.getElementById('user-prompt')); // resize if needed
+  // Auto-resize for system prompt input
+  if (systemPromptInput) {
+    autoResizeTextarea(systemPromptInput);
+    systemPromptInput.addEventListener('input', () => autoResizeTextarea(systemPromptInput));
   }
 });
 </script>

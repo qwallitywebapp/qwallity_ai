@@ -682,7 +682,7 @@ def get_weather():
 def chat():
     data = request.json
     user_message = data.get('message')
-    user_prompt = data.get('prompt', '')  # optional prompt, default empty string
+    user_prompt = data.get('systemPromptInput', '')  # optional prompt, default empty string
 
     if not user_message:
         return jsonify({'error': 'No message provided'}), 400
