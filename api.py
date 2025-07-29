@@ -1,4 +1,4 @@
-from flask import make_response
+from flask import make_response, request, jsonify, session, render_template, flash
 from passlib.handlers.sha2_crypt import sha256_crypt
 from functools import wraps
 import jwt
@@ -146,43 +146,79 @@ def user_register_api():
 
 
 class TaskSchema(ma.Schema):
-    class Meta:
-        fields = ('id', 'title')
+    id = ma.Int()
+    title = ma.Str()
 
 
 task_schema = TaskSchema()
 tasks_schema = TaskSchema(many=True)
+
+# Test endpoint to verify schema
+@app.route('/test_schema/api')
+def test_schema_api():
+    try:
+        # Create a test course object
+        test_course = Courses(
+            id=999,
+            title="Test Course",
+            body="Test Description",
+            author="Test Author",
+            coursetype="1",
+            price=99.99
+        )
+        
+        # Test the schema
+        result = task_schema.dump(test_course)
+        return jsonify({"success": True, "result": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e), "traceback": str(e.__traceback__)}), 500
 
 
 # get advanced courses
 @app.route('/courses/advanced/api')
 @is_logged_in_api
 def advanced_courses_api():
-    count_result = Courses.query.filter_by(coursetype=2).count()
-    courses = Courses.query.filter_by(coursetype=2).order_by(Courses.id.desc())
-    result = tasks_schema.dump(courses)
-    payload = {
-        "count": count_result,
-        "result": result
-    }
-    return jsonify(payload)
+    try:
+        count_result = Courses.query.filter_by(coursetype="2").count()
+        courses = Courses.query.filter_by(coursetype="2").order_by(Courses.id.desc()).all()
+        
+        # Debug: Check if courses exist
+        if not courses:
+            return jsonify({"count": 0, "result": []})
+            
+        # Debug: Check first course structure
+        first_course = courses[0] if courses else None
+        if first_course:
+            print(f"First course: id={first_course.id}, title={first_course.title}")
+        
+        result = tasks_schema.dump(courses)
+        payload = {
+            "count": count_result,
+            "result": result
+        }
+        return jsonify(payload)
+    except Exception as e:
+        return jsonify({"error": str(e), "type": str(type(e))}), 500
 
 
 # get fundamental courses
 @app.route('/courses/fundamental/api')
 @is_logged_in_api
 def fundamental_courses_api():
-    count_result = Courses.query.filter_by(coursetype=1).count()
-    courses = Courses.query.filter_by(coursetype=1).order_by(Courses.id.desc())
+    try:
+        count_result = Courses.query.filter_by(coursetype="1").count()
+        courses = Courses.query.filter_by(coursetype="1").order_by(Courses.id.desc()).all()
 
-    result = tasks_schema.dump(courses)
+        result = tasks_schema.dump(courses)
 
-    payload = {
-        "count": count_result,
-        "result": result
+        payload = {
+            "count": count_result,
+            "result": result
 
-    }
-    return jsonify(payload)
+        }
+        return jsonify(payload)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # add new article
