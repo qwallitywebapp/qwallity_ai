@@ -103,7 +103,7 @@ def generate_answer(question, user_promtp=None):
     gemini_messages.append({"role": "user", "parts": [prompt]})
 
     # 4. Generate answer
-    model = genai.GenerativeModel('models/gemini-2.0-flash-lite')
+    model = genai.GenerativeModel('models/gemini-flash-lite-latest')
     response = model.generate_content(
         gemini_messages,
         generation_config={"max_output_tokens": 200, "temperature": 0.5}
