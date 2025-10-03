@@ -11,18 +11,13 @@
             "access": 0
         },
         {
-            "email": "qwallityautomation09092024@gmail.com",
-            "code": "09092024#",
+            "email": "aiqwallity24.09.2025@gmail.com",
+            "code": "aiqwallity24092025",
             "access": 0
         },
         {
-            "email": "qwallitymanual17092024@gmail.com",
-            "code": "17092024.#",
-            "access": 0
-        },
-        {
-            "email": "qwallityapi02.11.2024@gmail.com",
-            "code": "qwallityapi021124",
+            "email": "qwallitymanual03102025@gmail.com",
+            "code": "qwallity03102025",
             "access": 0
         }
         
