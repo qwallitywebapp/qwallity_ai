@@ -12,7 +12,7 @@
         },
         {
             "email": "aiqwallity24.09.2025@gmail.com",
-            "code": "aiqwallity24092025",
+            "code": "aiqwallity2409",
             "access": 0
         },
         {
