@@ -106,7 +106,7 @@ def generate_answer(question, user_promtp=None):
     model = genai.GenerativeModel('models/gemini-flash-lite-latest')
     response = model.generate_content(
         gemini_messages,
-        generation_config={"max_output_tokens": 200, "temperature": 0.5}
+        generation_config={"max_output_tokens": 1000, "temperature": 0.5}
     )
     answer = response.text.strip()
     conversation_history.append({"role": "assistant", "content": answer})
