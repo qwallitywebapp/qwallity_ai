@@ -96,6 +96,7 @@ msgspec
 multidict
 mysql
 mysql-connector-python
+marshmallow-sqlalchemy
 mysqlclient
 numpy
 oauthlib
