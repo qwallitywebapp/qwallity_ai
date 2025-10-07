@@ -173,4 +173,3 @@ wsproto
 WTForms
 yarl
 zipp
-chromadb==1.1.1
