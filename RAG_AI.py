@@ -1,137 +1,115 @@
 import os
+import faiss
+import numpy as np
+import uuid  # For generating a unique session ID
 from dotenv import load_dotenv
 import google.generativeai as genai
-import chromadb
-from chromadb.utils import embedding_functions
 
-# -------------------------------
-# 1. Setup
-# -------------------------------
 load_dotenv()
 gemini_api_key = os.getenv('GEMINI_API_KEY')
 genai.configure(api_key=gemini_api_key)
 
-# Initialize Chroma client (local persistent DB)
-chroma_client = chromadb.PersistentClient(path="./chroma_db")
-
-# Create embedding function using Gemini
-embedding_fn = embedding_functions.GoogleGenerativeAiEmbeddingFunction(
-    api_key=gemini_api_key,
-    model_name="models/embedding-001"
-)
-
-# Create or load a collection
-collection = chroma_client.get_or_create_collection(
-    name="qwallity_docs",
-    embedding_function=embedding_fn
-)
-
-# -------------------------------
-# 2. Load markdown files
-# -------------------------------
+# Get content from .md files
 def load_markdown_files(directory):
     documents = []
     for filename in os.listdir(directory):
-        path = os.path.join(directory, filename)
-        if filename.endswith(".md") and os.path.isfile(path):
-            with open(path, "r", encoding="utf-8") as f:
-                content = f.read()
-                documents.append((filename, content))
+        with open(os.path.join(directory, filename), "r", encoding="utf-8") as f:
+            content = f.read()
+            documents.append((filename, content))
     return documents
 
+# Convert text to embeddings using Gemini
+# Gemini's embedding model is 'models/embedding-001'
+def create_embedding(text):
+    response = genai.embed_content(
+        model="models/embedding-001",
+        content=text,
+        task_type="retrieval_document"
+    )
+    return np.array(response['embedding'])
 
+# Load markdown files and create embeddings
 directory = "./qwallity_app_doc-pkg/docs"
 documents = load_markdown_files(directory)
+embeddings = [create_embedding(content) for _, content in documents]
 
-# -------------------------------
-# 3. Add documents to Chroma if not already present
-# -------------------------------
-existing_ids = set(collection.get()['ids']) if collection.count() > 0 else set()
+# Convert list of embeddings to a NumPy array for FAISS
+embedding_matrix = np.array(embeddings).astype("float32")
 
-new_docs = []
-new_ids = []
-for filename, content in documents:
-    if filename not in existing_ids:
-        new_docs.append(content)
-        new_ids.append(filename)
+# Initialize FAISS index
+embedding_dim = embedding_matrix.shape[1]  # Number of dimensions in each embedding
+index = faiss.IndexFlatL2(embedding_dim)
 
-if new_docs:
-    collection.add(documents=new_docs, ids=new_ids)
-    print(f"Added {len(new_docs)} new documents to ChromaDB.")
-else:
-    print("All documents already exist in ChromaDB.")
+# Add embeddings to the FAISS index
+index.add(embedding_matrix)
 
-# -------------------------------
-# 4. Search Function
-# -------------------------------
-def search_documents(question, k=3, relevance_threshold=0.67):
-    results = collection.query(
-        query_texts=[question],
-        n_results=k
-    )
+file_names = [filename for filename, _ in documents]
 
-    # Extract documents and distances
-    if not results["documents"] or not results["documents"][0]:
-        return None
-
-    docs_with_scores = list(zip(
-        results["ids"][0],
-        results["documents"][0],
-        results["distances"][0]
-    ))
-
-    # Apply threshold filtering
-    relevant_docs = [
-        (doc_id, content, dist)
-        for doc_id, content, dist in docs_with_scores
-        if dist <= relevance_threshold
-    ]
-
-    return relevant_docs if relevant_docs else None
-
-# -------------------------------
-# 5. Generate Answer
-# -------------------------------
+# Global variable to store conversation history
 conversation_history = []
 
-def generate_answer(question, user_prompt=None):
+def search_documents(question, k=3, relevance_threshold=0.67):  # k=3 to get the top 3 closest document embeddings to a query embedding.
+    # Generate embedding for the query
+    query_embedding = create_embedding(question).astype("float32").reshape(1, -1)
+
+    # Search in FAISS for top k nearest neighbors
+    distances, indices = index.search(query_embedding, k)
+    # Check if the closest document is under the relevance threshold
+    if all(distance > relevance_threshold for distance in distances[0]):
+        # If no document is relevant, return an empty list or a flag
+        return None
+    # Retrieve the corresponding documents' content (not just filenames)
+    results = [(file_names[idx], documents[idx][1], distances[0][i]) for i, idx in enumerate(indices[0])]
+    return results
+
+
+def generate_answer(question, user_promtp=None):
+    # Search for the top k documents relevant to the question
     top_documents = search_documents(question, k=3)
+    # Retrieve the content of the top documents (doc[1] is the content)
     relevant_texts = [doc[1] for doc in top_documents] if top_documents else []
     combined_text = "\n\n".join(relevant_texts)
-
+    # Maintain conversation history: Append the new question and relevant documents to the history
     conversation_history.append({"role": "user", "content": question})
     conversation_history.append({"role": "assistant", "content": combined_text})
 
-    if user_prompt:
-        prompt = f"Using {user_prompt}, answer: {question}\n\nRelevant docs:\n{combined_text}"
+
+    if user_promtp:
+        prompt = f"Using {user_promtp} answer on {question} Here are some relevant documents that may help answer the question:\n{combined_text}"
     else:
+        # Create the prompt to send to Gemini for generating an answer
         prompt = (
-            f"""Question: {question}\n\nHere are some relevant documents:\n{combined_text}\n\n
-            Instructions:\n
-            - Provide a concise and accurate answer **based only on the above documents**.\n
-            - If the question is unrelated, reply: 
-              'Sorry, I can only answer questions related to the Qwallity application based on the provided information.'"""
+            f"Question: {question}\n\n"
+            f"Here are some relevant documents that may help answer the question:\n{combined_text}\n\n"
+            f"Instructions:\n"
+            f"- Provide a concise and accurate answer **based only on the above documents**.\n"
+            f"- If the question is a greeting (e.g., 'Hi', 'Hello', 'Good morning'), respond politely.\n"
+            f"- If the question is unrelated to the application or cannot be answered using the provided documents, respond with:\n"
+            f"  'Sorry, I can only answer questions related to the Qwallity application based on the provided information.'"
         )
+    # 1. System message
+    gemini_messages = [
+        {"role": "user", "parts": ["You are a helpful assistant."]}
+    ]
 
-    gemini_messages = [{"role": "user", "parts": ["You are a helpful assistant."]}]
+    # 2. Add conversation history
     for entry in conversation_history:
-        gemini_messages.append({
-            "role": "user" if entry["role"] == "user" else "model",
-            "parts": [entry["content"]]
-        })
+        if entry["role"] == "user":
+            gemini_messages.append({"role": "user", "parts": [entry["content"]]})
+        elif entry["role"] == "assistant":
+            gemini_messages.append({"role": "model", "parts": [entry["content"]]})
 
+    # 3. Add the new prompt as the last user message
     gemini_messages.append({"role": "user", "parts": [prompt]})
 
-    # print("**********************************************************")
-    # print(gemini_messages)
-    # print("**********************************************************")
-    model = genai.GenerativeModel("models/gemini-flash-lite-latest")
+    # 4. Generate answer
+    model = genai.GenerativeModel('models/gemini-flash-lite-latest')
     response = model.generate_content(
         gemini_messages,
-        generation_config={"max_output_tokens": 100, "temperature": 0.5}
-
+        generation_config={"max_output_tokens": 1000, "temperature": 0.5}
     )
     answer = response.text.strip()
     conversation_history.append({"role": "assistant", "content": answer})
     return answer
+
 
