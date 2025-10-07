@@ -4,9 +4,9 @@ import google.generativeai as genai
 import chromadb
 from chromadb.utils import embedding_functions
 
-# ───────────────────────────────
+# -------------------------------
 # 1. Setup
-# ───────────────────────────────
+# -------------------------------
 load_dotenv()
 gemini_api_key = os.getenv('GEMINI_API_KEY')
 genai.configure(api_key=gemini_api_key)
@@ -26,9 +26,9 @@ collection = chroma_client.get_or_create_collection(
     embedding_function=embedding_fn
 )
 
-# ───────────────────────────────
+# -------------------------------
 # 2. Load markdown files
-# ───────────────────────────────
+# -------------------------------
 def load_markdown_files(directory):
     documents = []
     for filename in os.listdir(directory):
@@ -43,9 +43,9 @@ def load_markdown_files(directory):
 directory = "./qwallity_app_doc-pkg/docs"
 documents = load_markdown_files(directory)
 
-# ───────────────────────────────
+# -------------------------------
 # 3. Add documents to Chroma if not already present
-# ───────────────────────────────
+# -------------------------------
 existing_ids = set(collection.get()['ids']) if collection.count() > 0 else set()
 
 new_docs = []
@@ -61,9 +61,9 @@ if new_docs:
 else:
     print("All documents already exist in ChromaDB.")
 
-# ───────────────────────────────
+# -------------------------------
 # 4. Search Function
-# ───────────────────────────────
+# -------------------------------
 def search_documents(question, k=3, relevance_threshold=0.67):
     results = collection.query(
         query_texts=[question],
@@ -89,9 +89,9 @@ def search_documents(question, k=3, relevance_threshold=0.67):
 
     return relevant_docs if relevant_docs else None
 
-# ───────────────────────────────
+# -------------------------------
 # 5. Generate Answer
-# ───────────────────────────────
+# -------------------------------
 conversation_history = []
 
 def generate_answer(question, user_prompt=None):
@@ -121,6 +121,7 @@ def generate_answer(question, user_prompt=None):
         })
 
     gemini_messages.append({"role": "user", "parts": [prompt]})
+
     # print("**********************************************************")
     # print(gemini_messages)
     # print("**********************************************************")
@@ -128,7 +129,9 @@ def generate_answer(question, user_prompt=None):
     response = model.generate_content(
         gemini_messages,
         generation_config={"max_output_tokens": 100, "temperature": 0.5}
+
     )
     answer = response.text.strip()
     conversation_history.append({"role": "assistant", "content": answer})
     return answer
+
