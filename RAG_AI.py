@@ -63,53 +63,47 @@ def search_documents(question, k=3, relevance_threshold=0.67):  # k=3 to get the
     return results
 
 
-def generate_answer(question, user_promtp=None):
-    # Search for the top k documents relevant to the question
+def generate_answer(question, user_prompt=None):
     top_documents = search_documents(question, k=3)
-    # Retrieve the content of the top documents (doc[1] is the content)
     relevant_texts = [doc[1] for doc in top_documents] if top_documents else []
     combined_text = "\n\n".join(relevant_texts)
-    # Maintain conversation history: Append the new question and relevant documents to the history
+
     conversation_history.append({"role": "user", "content": question})
     conversation_history.append({"role": "assistant", "content": combined_text})
 
-
-    if user_promtp:
-        prompt = f"Using {user_promtp} answer on {question} Here are some relevant documents that may help answer the question:\n{combined_text}"
+    if user_prompt:
+        prompt = f"Using {user_prompt}, answer: {question}\n\nRelevant docs:\n{combined_text}"
     else:
-        # Create the prompt to send to Gemini for generating an answer
         prompt = (
-            f"Question: {question}\n\n"
-            f"Here are some relevant documents that may help answer the question:\n{combined_text}\n\n"
-            f"Instructions:\n"
-            f"- Provide a concise and accurate answer **based only on the above documents**.\n"
-            f"- If the question is a greeting (e.g., 'Hi', 'Hello', 'Good morning'), respond politely.\n"
-            f"- If the question is unrelated to the application or cannot be answered using the provided documents, respond with:\n"
-            f"  'Sorry, I can only answer questions related to the Qwallity application based on the provided information.'"
+          f"""Question: {question}\n\n"
+            Here are some relevant documents that may help answer the question:\n{combined_text}\n\n
+            Instructions:\n
+            - Provide a concise and accurate answer **based only on the above documents**.\n
+            - If the question is a greeting (e.g., 'Hi', 'Hello', 'Good morning'), respond politely.\n
+            - If the question is unrelated to the application or cannot be answered using the provided documents, respond with:\n
+              'Sorry, I can only answer questions related to the Qwallity application based on the provided information."""
         )
-    # 1. System message
-    gemini_messages = [
-        {"role": "user", "parts": ["You are a helpful assistant."]}
-    ]
 
-    # 2. Add conversation history
+    gemini_messages = [{"role": "user", "parts": ["You are a helpful assistant."]}]
     for entry in conversation_history:
-        if entry["role"] == "user":
-            gemini_messages.append({"role": "user", "parts": [entry["content"]]})
-        elif entry["role"] == "assistant":
-            gemini_messages.append({"role": "model", "parts": [entry["content"]]})
+        gemini_messages.append({
+            "role": "user" if entry["role"] == "user" else "model",
+            "parts": [entry["content"]]
+        })
 
-    # 3. Add the new prompt as the last user message
     gemini_messages.append({"role": "user", "parts": [prompt]})
 
-    # 4. Generate answer
-    model = genai.GenerativeModel('models/gemini-flash-lite-latest')
+    model = genai.GenerativeModel("models/gemini-flash-lite-latest")
     response = model.generate_content(
         gemini_messages,
-        generation_config={"max_output_tokens": 1000, "temperature": 0.5}
+        generation_config={"max_output_tokens": 1000, "temperature": 0.1}
+
     )
+    input_tokens = model.count_tokens(gemini_messages).total_tokens
     answer = response.text.strip()
+    output_tokens = model.count_tokens(response.text).total_tokens
     conversation_history.append({"role": "assistant", "content": answer})
-    return answer
+    return [answer, input_tokens, output_tokens]
+
 
 
