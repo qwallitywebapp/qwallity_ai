@@ -27,6 +27,8 @@ from api import *
 from flask_session import Session
 from models import *
 import RAG_AI
+import logging
+import sys
 
 #variables
 admin = False
@@ -38,7 +40,11 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['SESSION_TYPE'] = 'filesystem'
 
 socketio = SocketIO(app, allow_upgrades=False, cors_allowed_origins='*')
-
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
 logged_in_username = None
 @app.before_request
 def make_session_permanent():
@@ -697,5 +703,6 @@ if __name__=='__main__':
         db.create_all()
     app.secret_key='secret'
     app.run()
+    app.logger.info("testttttttttttttttttttttttttttttttttttttttttttttttt")
     socketio.run(app)
 
