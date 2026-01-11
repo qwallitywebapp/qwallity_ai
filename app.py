@@ -29,6 +29,7 @@ from models import *
 import RAG_AI
 import logging
 import sys
+import logging_config
 
 #variables
 admin = False
@@ -38,13 +39,9 @@ UPLOAD_FOLDER = os.path.join(os.getcwd(), "static", "Upload")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['SESSION_TYPE'] = 'filesystem'
-
+logging_config.setup_logging()
 socketio = SocketIO(app, allow_upgrades=False, cors_allowed_origins='*')
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)]
-)
+
 logged_in_username = None
 @app.before_request
 def make_session_permanent():
@@ -375,6 +372,7 @@ def profile():
 #Homepage
 @app.route('/home')
 def home_index():
+    logging.info("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
     courses = Courses.query.order_by(Courses.id.desc()).all()
     return render_template('home.html', courses=courses)
 
