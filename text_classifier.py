@@ -22,7 +22,7 @@ _EMBEDDING_MODEL = _data["embedding_model"]
 # =========================
 # Gemini client
 # =========================
-_client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def _get_embedding(text: str) -> list[float]:
     result = _client.models.embed_content(
