@@ -54,6 +54,7 @@ fonttools
 frozenlist
 ghp-import
 google
+google-genai
 google-ai-generativelanguage
 google-api-core
 google-api-python-client
@@ -149,6 +150,7 @@ sniffio
 sortedcontainers
 soupsieve
 SQLAlchemy
+scikit-learn
 text-unidecode
 tk
 toml

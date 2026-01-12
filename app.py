@@ -372,7 +372,6 @@ def profile():
 #Homepage
 @app.route('/home')
 def home_index():
-    logging.info("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
     courses = Courses.query.order_by(Courses.id.desc()).all()
     return render_template('home.html', courses=courses)
 
@@ -696,7 +695,7 @@ def chat():
     if show_tokens:
         return jsonify({'answer': answer})
     else:
-        return jsonify({'answer': answer[0]})
+        return jsonify({'answer': answer["answer"]})
     
 
 if __name__=='__main__':
@@ -704,6 +703,5 @@ if __name__=='__main__':
         db.create_all()
     app.secret_key='secret'
     app.run()
-    app.logger.info("testttttttttttttttttttttttttttttttttttttttttttttttt")
     socketio.run(app)
 
