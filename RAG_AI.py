@@ -1,18 +1,19 @@
 import os
 import faiss
 import numpy as np
-import uuid  # For generating a unique session ID
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
 from text_classifier import classify_text
-import logging 
+import logging
+
 load_dotenv()
 gemini_api_key = os.getenv('GEMINI_API_KEY')
-genai.configure(api_key=gemini_api_key)
+client = genai.Client(api_key=gemini_api_key)
 
 
 # Get content from .md files
 logger = logging.getLogger("qwallity_ai")
+
 
 def load_markdown_files(directory):
     documents = []
@@ -27,12 +28,12 @@ def load_markdown_files(directory):
 
 
 def create_embedding(text):
-    response = genai.embed_content(
-        model="text-embedding-004",
-        content=text,
-        task_type="retrieval_document"
+    response = client.models.embed_content(
+        model="models/gemini-embedding-001",
+        contents=text
     )
-    return np.array(response['embedding'])
+
+    return np.array(response.embeddings[0].values)
 
 
 # Load markdown files and create embeddings
@@ -57,92 +58,117 @@ file_names = [filename for filename, _ in documents]
 conversation_history = []
 
 
-# k=3 to get the top 3 closest document embeddings to a query embedding.
 def search_documents(question, k=3, relevance_threshold=0.67):
-    # Generate embedding for the query
-    query_embedding = create_embedding(
-        question).astype("float32").reshape(1, -1)
+    query_embedding = create_embedding(question).astype("float32").reshape(1, -1)
 
-    # Search in FAISS for top k nearest neighbors
     distances, indices = index.search(query_embedding, k)
-    # Check if the closest document is under the relevance threshold
-    if all(distance > relevance_threshold for distance in distances[0]):
-        # If no document is relevant, return an empty list or a flag
-        return None
-    # Retrieve the corresponding documents' content (not just filenames)
-    results = [(file_names[idx], documents[idx][1], distances[0][i])
-               for i, idx in enumerate(indices[0])]
-    return results
 
+    # ✅ FAISS: smaller distance = closer match
+    if distances[0][0] > relevance_threshold:
+        return None
+
+    results = [
+        (file_names[idx], documents[idx][1], distances[0][i])
+        for i, idx in enumerate(indices[0])
+    ]
+    return results
 
 def generate_answer(question, user_prompt=None):
     classification_result = classify_text(question)
     question_type = classification_result["label"]
+
     if question_type == "greeting":
         logger.info(f"Question '{question}' classified as greeting")
         answer = "Hello! What can I help you with today?"
-        return {
-            "answer": answer
-        }
+        return {"answer": answer}
+
     elif question_type == "thanks":
         logger.info(f"Question '{question}' classified as thanks")
         answer = "Thank you! Have a great day."
-        return {
-            "answer": answer
-        }
+        return {"answer": answer}
+
     elif question_type == "gibberish":
         logger.info(f"Question '{question}' classified as gibberish")
         answer = "I’m not sure I understood your message. Can you try again?"
-        return {
-            "answer": answer
-        }
+        return {"answer": answer}
+
     else:
         logger.info(
             f"No intent classification matched for question '{question}'. Routed to LLM."
         )
+
         top_documents = search_documents(question, k=3)
-        relevant_texts = [doc[1]
-                          for doc in top_documents] if top_documents else []
+        relevant_texts = [doc[1] for doc in top_documents] if top_documents else []
         combined_text = "\n\n".join(relevant_texts)
 
         conversation_history.append({"role": "user", "content": question})
-        conversation_history.append(
-            {"role": "assistant", "content": combined_text})
+        conversation_history.append({"role": "assistant", "content": combined_text})
 
         if user_prompt:
             prompt = f"Using {user_prompt}, answer: {question}\n\nRelevant docs:\n{combined_text}"
         else:
-            prompt = (
-                f"""Question: {question}\n\n"
-                Here are some relevant documents that may help answer the question:\n{combined_text}\n\n
-                Instructions:\n
-                - Provide a concise and accurate answer **based only on the above documents**.\n
-                - If the question is a greeting (e.g., 'Hi', 'Hello', 'Good morning'), respond politely.\n
-                - If the question is unrelated to the application or cannot be answered using the provided documents, respond with:\n
-                'Sorry, I can only answer questions related to the Qwallity application based on the provided information."""
-            )
+            prompt = f"""
+Question: {question}
 
-        gemini_messages = [
-            {"role": "user", "parts": ["You are a helpful assistant."]}]
+Here are some relevant documents that may help answer the question:
+{combined_text}
+
+Instructions:
+- Provide a concise and accurate answer **based only on the above documents**.
+- If the question is a greeting (e.g., 'Hi', 'Hello', 'Good morning'), respond politely.
+- If the question is unrelated to the application or cannot be answered using the provided documents, respond with:
+'Sorry, I can only answer questions related to the Qwallity application based on the provided information.'
+"""
+
+        # =====================================================
+        # FIXED PART (old gemini_messages removed)
+        # Gemini SDK needs plain text prompt, not dict messages
+        # =====================================================
+
+        prompt_text = "You are a helpful assistant.\n\n"
+
         for entry in conversation_history:
-            gemini_messages.append({
-                "role": "user" if entry["role"] == "user" else "model",
-                "parts": [entry["content"]]
-            })
+            role = "User" if entry["role"] == "user" else "Assistant"
+            prompt_text += f"{role}: {entry['content']}\n\n"
 
-        gemini_messages.append({"role": "user", "parts": [prompt]})
+        prompt_text += f"User: {prompt}\n\nAssistant:"
 
-        model = genai.GenerativeModel("models/gemini-flash-lite-latest")
-        response = model.generate_content(
-            gemini_messages,
-            generation_config={"max_output_tokens": 1000, "temperature": 0.1}
+        # =====================================================
+        # Generate answer (correct SDK usage)
+        # =====================================================
 
+        response = client.models.generate_content(
+            model="models/gemini-flash-lite-latest",
+            contents=prompt_text,
+            config={
+                "max_output_tokens": 1000,
+                "temperature": 0.1
+            }
         )
-        input_tokens = model.count_tokens(gemini_messages).total_tokens
+
+        # =====================================================
+        # Token counting must use same text prompt
+        # =====================================================
+
+        input_tokens = client.models.count_tokens(
+            model="models/gemini-flash-lite-latest",
+            contents=prompt_text
+        ).total_tokens
+
         answer = response.text.strip()
-        output_tokens = model.count_tokens(response.text).total_tokens
-        conversation_history.append({"role": "assistant", "content": answer})
+
+        output_tokens = client.models.count_tokens(
+            model="models/gemini-flash-lite-latest",
+            contents=answer
+        ).total_tokens
+
+        conversation_history.append({
+            "role": "assistant",
+            "content": answer
+        })
+
         logger.info(f"Input tokens {input_tokens}, Output tokens {output_tokens}")
+
         return {
             "answer": answer,
             "input_tokens": input_tokens,

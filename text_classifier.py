@@ -17,8 +17,7 @@ with open(MODEL_PATH, "rb") as f:
     _data = pickle.load(f)
 
 _model = _data["model"]
-_EMBEDDING_MODEL = _data["embedding_model"]
-
+_EMBEDDING_MODEL ="models/gemini-embedding-001"
 # =========================
 # Gemini client
 # =========================
