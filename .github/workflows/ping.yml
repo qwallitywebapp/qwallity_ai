@@ -1,0 +1,10 @@
+name: KeepAlive
+on:
+  schedule:
+    - cron: '*/14 * * * *' # ping every  14 minute
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send request
+        run: curl -I https://qwallity-chatbot.onrender.com
