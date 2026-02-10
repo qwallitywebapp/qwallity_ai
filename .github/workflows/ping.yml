@@ -1,7 +1,9 @@
 name: KeepAlive
 on:
   schedule:
-    - cron: '*/14 * * * *' # ping every  14 minute
+    - cron: '*/14 * * * *' # Стучит в дверь каждые 14 минут
+  workflow_dispatch:      # Добавляет кнопку ручного запуска
+
 jobs:
   ping:
     runs-on: ubuntu-latest
