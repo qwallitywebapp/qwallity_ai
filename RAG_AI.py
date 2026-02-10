@@ -58,7 +58,7 @@ file_names = [filename for filename, _ in documents]
 conversation_history = []
 
 
-def search_documents(question, k=3, relevance_threshold=0.67):
+def search_documents(question, k=3, relevance_threshold=0.9):
     query_embedding = create_embedding(question).astype("float32").reshape(1, -1)
 
     distances, indices = index.search(query_embedding, k)
