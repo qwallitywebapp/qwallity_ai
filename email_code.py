@@ -14,7 +14,7 @@
             "email": "qwallityaicourse15012026@gmail.com",
             "code": "15012026@",
             "access": 0
-        },
+        }
 
         
     ]
