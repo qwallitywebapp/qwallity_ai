@@ -3,6 +3,9 @@
 {% block body %}
 <h1><div id="welcome_text"></div></h1>
 <script>
+  let chatHistory = JSON.parse(
+  localStorage.getItem("chat_history") || "[]"
+);
   var username = localStorage.getItem("username");
   if(username === null){
     username = 'Guest'
@@ -147,7 +150,13 @@ document.getElementById("send-button").onclick = function () {
     userMessage.classList.add("message", "user");
     userMessage.textContent = userInput;
     chatMessages.appendChild(userMessage);
+    chatHistory.push({ role: "user", content: userInput });
 
+    if (chatHistory.length > 20) {
+      chatHistory = chatHistory.slice(-20);
+    }
+
+    localStorage.setItem("chat_history", JSON.stringify(chatHistory));
     document.getElementById("greeting-message").style.display = "none";
     document.getElementById("robot_img").style.display = "none";
     document.getElementById("user-input").value = "";
@@ -159,7 +168,8 @@ document.getElementById("send-button").onclick = function () {
     // Send both message and systemPromptInput to the backend
     axios.post('/api/chat', {
       message: userInput,
-      systemPromptInput: savedPrompt
+      systemPromptInput: savedPrompt,
+      history: chatHistory   // ✅ add this
     })
     .then(response => {
       document.getElementById("loading-spinner").style.display = "none";
@@ -167,6 +177,13 @@ document.getElementById("send-button").onclick = function () {
       botMessage.classList.add("message", "bot");
       botMessage.textContent = response.data.answer;
       chatMessages.appendChild(botMessage);
+      chatHistory.push({ role: "assistant", content: response.data.answer });
+
+      if (chatHistory.length > 20) {
+        chatHistory = chatHistory.slice(-20);
+      }
+
+      localStorage.setItem("chat_history", JSON.stringify(chatHistory));
       chatMessages.scrollTop = chatMessages.scrollHeight;
     })
     .catch(error => {
@@ -188,6 +205,8 @@ document.getElementById('clear-chat').onclick = () => {
   [...chatMessages.querySelectorAll('.message.user, .message.bot')].forEach(el => el.remove());
   document.getElementById("greeting-message").style.display = "block";
   document.getElementById("robot_img").style.display = "inline-block";
+  chatHistory = [];
+  localStorage.removeItem("chat_history");
   chatMessages.scrollTop = 0;
 };
 

@@ -11,7 +11,6 @@ from functools import wraps
 
 from flask import (Flask, Response, flash, redirect, render_template, request,
                    send_file, session, url_for, send_from_directory)
-from flask_mail import Mail, Message
 from flask_mysqldb import MySQL
 from flask_socketio import (SocketIO, SocketIOTestClient, emit, join_room,
                             leave_room)
@@ -685,13 +684,14 @@ def get_weather():
 def chat():
     data = request.json
     user_message = data.get('message')
-    user_prompt = data.get('systemPromptInput', '')  # optional prompt, default empty string
+    user_prompt = data.get('systemPromptInput', '')
+    history = data.get("history", [])  # optional prompt, default empty string
     show_tokens = data.get('show_tokens', False)
     if not user_message:
         return jsonify({'error': 'No message provided'}), 400
 
     # Call generate_answer with separate question and user_prompt arguments
-    answer = RAG_AI.generate_answer(user_message, user_prompt)
+    answer = RAG_AI.generate_answer(user_message, history=history, user_prompt=user_prompt)
     if show_tokens:
         return jsonify({'answer': answer})
     else:
