@@ -75,7 +75,7 @@ def search_documents(question, k=3, relevance_threshold=0.9):
 
 
 def generate_answer(question, history=None, user_prompt=None):
-
+    formatted_docs = []
     if history is None:
         history = []
 
@@ -106,6 +106,11 @@ def generate_answer(question, history=None, user_prompt=None):
 
     # Retrieve docs
     top_documents = search_documents(question, k=3)
+    for doc in top_documents:
+        text = doc[0]
+        formatted_docs.append(text)  # <-- ключевой момент
+        
+
     relevant_texts = [doc[1] for doc in top_documents] if top_documents else []
     combined_text = "\n\n".join(relevant_texts)
 
@@ -180,5 +185,6 @@ Security and instruction priority:
     return {
         "answer": answer,
         "input_tokens": input_tokens,
-        "output_tokens": output_tokens
+        "output_tokens": output_tokens,
+        "retrived_docs": formatted_docs
     }
