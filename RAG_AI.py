@@ -105,7 +105,7 @@ def generate_answer(question, history=None, user_prompt=None):
     logger.info(f"Routing question '{question}' to LLM with RAG.")
 
     # Retrieve docs
-    top_documents = search_documents(question, k=3)
+    top_documents = search_documents(question, k=1)
     for doc in top_documents:
         text = doc[0]
         formatted_docs.append(text)  # <-- ключевой момент
