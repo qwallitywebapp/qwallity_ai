@@ -20,7 +20,7 @@ openai
 google-generativeai
 faiss-cpu
 numpy
-scikit-learn==1.8.0
+scikit-learn==1.7.2
 jsonpath_ng
 # Serialization & API
 flask-marshmallow
