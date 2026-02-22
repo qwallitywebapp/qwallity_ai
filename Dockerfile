@@ -1,18 +1,29 @@
 # syntax=docker/dockerfile:1
 
-ARG PYTHON_VERSION=3.12.12
-
-FROM python:${PYTHON_VERSION}-slim
-
-LABEL fly_launch_runtime="flask"
+FROM python:3.10
 
 WORKDIR /code
 
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    g++ \
+    libatlas-base-dev \
+    libopenblas-dev \
+    libssl-dev \
+    libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --upgrade pip
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Build MkDocs during image build
+RUN mkdocs build
+
 EXPOSE 8080
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0", "--port=8080"]
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
