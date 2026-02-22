@@ -23,8 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Build MkDocs static site
-RUN mkdocs build
-
+RUN mkdocs build -f qwallity_app_doc-pkg/mkdocs.yml
 EXPOSE 8080
 
 CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]
