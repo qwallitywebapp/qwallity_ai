@@ -27,7 +27,19 @@ flask-marshmallow
 marshmallow
 marshmallow-sqlalchemy
 flask-swagger-ui
-
+google
+google-genai
+google-ai-generativelanguage
+google-api-core
+google-api-python-client
+google-auth
+google-auth-httplib2
+google-auth-oauthlib
+googleapis-common-protos
+greenlet
+grpcio
+grpcio-status
+gunicorn
 # Real-time & Communication
 Flask-SocketIO
 Flask-Mail
