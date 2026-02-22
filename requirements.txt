@@ -21,7 +21,7 @@ google-generativeai
 faiss-cpu
 numpy
 scikit-learn
-
+jsonpath_ng
 # Serialization & API
 flask-marshmallow
 marshmallow
