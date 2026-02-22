@@ -10,7 +10,7 @@ mysqlclient
 Flask-SQLAlchemy
 SQLAlchemy
 PyMySQL
-
+matplotlib
 # Forms & Validation (Fixed the missing module error)
 WTForms
 Flask-WTF
