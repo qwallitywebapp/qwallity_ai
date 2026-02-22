@@ -6,7 +6,7 @@ Flask-SocketIO
 Flask-SQLAlchemy
 flask-marshmallow
 flask-swagger-ui
-
+flask-mysqldb
 PyMySQL
 SQLAlchemy
 marshmallow
