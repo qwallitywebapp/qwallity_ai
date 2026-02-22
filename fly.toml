@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for qwallity-ai-ivfvdg on 2026-02-22T10:24:31Z
+# fly.toml app configuration file generated for qwallity-ai-lblb-a on 2026-02-22T10:33:27Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'qwallity-ai-ivfvdg'
+app = 'qwallity-ai-lblb-a'
 primary_region = 'ams'
 
 [build]
