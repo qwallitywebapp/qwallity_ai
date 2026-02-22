@@ -1,37 +1,54 @@
+# Web Framework & Server
 Flask
 gunicorn
-Flask-Mail
-Flask-Session
-Flask-SocketIO
-Flask-SQLAlchemy
-flask-marshmallow
-flask-swagger-ui
-flask-mysqldb
-PyMySQL
-SQLAlchemy
-marshmallow
-marshmallow-sqlalchemy
+Werkzeug
+Jinja2
 
-python-dotenv
-requests
+# Database & MySQL
+Flask-MySQLdb
+mysqlclient
+Flask-SQLAlchemy
+SQLAlchemy
+PyMySQL
+
+# Forms & Validation (Fixed the missing module error)
+WTForms
+Flask-WTF
+
+# AI & Data
 openai
 google-generativeai
-
 faiss-cpu
 numpy
 scikit-learn
 
+# Serialization & API
+flask-marshmallow
+marshmallow
+marshmallow-sqlalchemy
+flask-swagger-ui
+
+# Real-time & Communication
+Flask-SocketIO
+Flask-Mail
+Flask-Session
+requests
+aiohttp
+
+# Document Processing
 python-docx
 docxtpl
 lxml
-pillow
+Pillow
 
+# Utils
+python-dotenv
 beautifulsoup4
-aiohttp
-tqdm
 passlib
 PyJWT
+tqdm
+PyYAML
 
+# Documentation
 mkdocs
 Markdown
-PyYAML
