@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for qwallity-ai-lblb-a on 2026-02-22T10:33:27Z
+# fly.toml app configuration file generated for qwallity-ai-chatbot on 2026-02-22T10:38:51Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'qwallity-ai-lblb-a'
+app = 'qwallity-ai-chatbot'
 primary_region = 'ams'
 
 [build]
@@ -20,4 +20,4 @@ primary_region = 'ams'
   memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
-  memory_mb = 256
+  memory_mb = 512
