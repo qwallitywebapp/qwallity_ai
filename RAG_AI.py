@@ -95,10 +95,7 @@ def generate_answer(question, history=None, user_prompt=None):
 
     elif question_type == "gibberish":
         return {"answer": "I’m not sure I understood your message. Can you try again?"}
-    elif question_type == "injection_attempt":
-        return {"answer": "The chatbot is secured, ask only related questions"}
-    elif question_type == "small_talk":
-        return {"answer": "Thank you for the question, but ask document related questions"}
+
 
 
     # -----------------------------
