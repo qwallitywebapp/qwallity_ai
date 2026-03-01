@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from google import genai
 from text_classifier import classify_text
 import logging
+import time
 
 load_dotenv()
 gemini_api_key = os.getenv('GEMINI_API_KEY')
@@ -76,6 +77,7 @@ def search_documents(question, k=3, relevance_threshold=0.9):
 
 def generate_answer(question, history=None, user_prompt=None):
     formatted_docs = []
+    start_time = time.perf_counter()
     if history is None:
         history = []
 
@@ -179,6 +181,8 @@ Security and instruction priority:
         model="models/gemini-flash-lite-latest",
         contents=answer
     ).total_tokens
+    end_time = time.perf_counter()
+    latency = round(end_time - start_time, 2)
 
     logger.info(f"Input tokens {input_tokens}, Output tokens {output_tokens}")
 
@@ -186,5 +190,6 @@ Security and instruction priority:
         "answer": answer,
         "input_tokens": input_tokens,
         "output_tokens": output_tokens,
-        "retrived_docs": formatted_docs
+        "retrived_docs": formatted_docs,
+        "latency": latency
     }

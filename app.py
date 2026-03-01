@@ -686,20 +686,18 @@ def chat():
     user_message = data.get('message')
     user_prompt = data.get('systemPromptInput', '')
     history = data.get("history", [])  # optional prompt, default empty string
-    show_tokens = data.get('show_tokens', False)
-    show_docs = data.get('show_docs', False)
+    show_details = data.get('show_details', False)
     if not user_message:
         return jsonify({'error': 'No message provided'}), 400
 
     # Call generate_answer with separate question and user_prompt arguments
     answer = RAG_AI.generate_answer(user_message, history=history, user_prompt=user_prompt)
-    if show_tokens:
+    if show_details:
         return jsonify({'answer': answer})
-    elif show_docs:
-        return jsonify({'answer': answer["answer"], 'retrived_docs': answer.get("retrived_docs")})
     else:
         return jsonify({'answer': answer["answer"]})
-    
+
+
 
 if __name__=='__main__':
     with app.app_context():
