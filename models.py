@@ -113,7 +113,7 @@ class RegisterForm(Form):
 class VerifyAccess(Form):
      
     email = StringField('Email', [validators.Length(min=6, max=50), Regexp(r"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$",message='Email format is not valid.')])
-    code = StringField('Code', [validators.Length(min=1, max=15), Regexp(r"[0-9]+",message='Code format is not valid.')])
+    code = StringField('Code', [validators.Length(min=1, max=20), Regexp(r"[0-9]+",message='Code format is not valid.')])
 
 
 class Forgot(Form):
