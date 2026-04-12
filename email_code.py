@@ -24,6 +24,11 @@
             "email": "qwallitye2egroup2@gmail.com",
             "code": "#.qwallitye2egroup2",
             "access": 0
+        },
+        {
+            "email": "aiqagroup1@gmail.com",
+            "code": "aiqa_group1.@",
+            "access": 0
         }
         
     ]
