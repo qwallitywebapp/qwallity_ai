@@ -11,28 +11,8 @@
             "access": 0
         },
         {
-            "email": "qwallitymanual03102025@gmail.com",
-            "code": "qwallity03102025",
-            "access": 0
-        },
-        {
-            "email": "qwallityautomation25082025@gmail.com",
-            "code": "25082025_#",
-            "access": 0
-        },
-        {
-            "email": "aiqwallity24.09.2025@gmail.com",
-            "code": "aiqwallity24092025",
-            "access": 0
-        },
-        {
-            "email": "qwalitye2egroup1@gmail.com",
-            "code": "qwallitye2egroup1#.",
-            "access": 0
-        },
-        {
-            "email": "qwallitye2e@gmail.com",
-            "code": "Qwallitye2e**",
+            "email": "qwallity@gmail.com",
+            "code": "12345678",
             "access": 0
         }
     ]
