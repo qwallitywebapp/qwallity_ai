@@ -108,10 +108,13 @@ def generate_answer(question, history=None, user_prompt=None):
 
     # Retrieve docs
     top_documents = search_documents(question, k=1)
-    for doc in top_documents:
-        text = doc[0]
-        formatted_docs.append(text)  # <-- ключевой момент
-        
+    if top_documents:
+        for doc in top_documents:
+            text = doc[0]
+            formatted_docs.append(text)  # <-- ключевой момент
+    else:
+        return {"answer": "I’m not sure I understood your message. Can you try again?"}
+            
 
     relevant_texts = [doc[1] for doc in top_documents] if top_documents else []
     combined_text = "\n\n".join(relevant_texts)
