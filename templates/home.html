@@ -3,9 +3,8 @@
 {% block body %}
 <h1><div id="welcome_text"></div></h1>
 <script>
-  let chatHistory = JSON.parse(
-  localStorage.getItem("chat_history") || "[]"
-);
+  localStorage.removeItem("chat_history");
+  let chatHistory = [];
   var username = localStorage.getItem("username");
   if(username === null){
     username = 'Guest'
@@ -137,6 +136,7 @@ document.getElementById("chat-toggle").onclick = function () {
 document.getElementById("close-chat").onclick = function () {
   document.getElementById("chat-popup").style.display = "none";
   document.getElementById("chat-toggle").style.display = "inline-block";
+  localStorage.removeItem("chat_history");
 };
 
 document.getElementById("send-button").onclick = function () {
@@ -206,7 +206,7 @@ document.getElementById('clear-chat').onclick = () => {
   document.getElementById("greeting-message").style.display = "block";
   document.getElementById("robot_img").style.display = "inline-block";
   chatHistory = [];
-  localStorage.removeItem("chat_history");
+  localStorage.clear();
   chatMessages.scrollTop = 0;
 };
 
