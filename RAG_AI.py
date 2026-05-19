@@ -6,6 +6,9 @@ from google import genai
 from text_classifier import classify_text
 import logging
 import time
+from spellchecker import SpellChecker
+
+
 
 load_dotenv()
 gemini_api_key = os.getenv('GEMINI_API_KEY')
@@ -17,7 +20,6 @@ logger = logging.getLogger("qwallity_ai")
 
 def _normalize(text: str) -> str:
     return text.strip().lower()
-
 
 def load_markdown_files(directory):
     documents = []
@@ -37,7 +39,11 @@ def create_embedding(text):
         contents=text
     )
 
-    return np.array(response.embeddings[0].values)
+    vec = np.array(response.embeddings[0].values)
+    norm = np.linalg.norm(vec)
+    if norm > 0:
+        vec = vec / norm
+    return vec
 
 
 # Load markdown files and create embeddings
@@ -62,13 +68,13 @@ file_names = [filename for filename, _ in documents]
 conversation_history = []
 
 
-def search_documents(question, k=3, relevance_threshold=0.9):
+def search_documents(question, k=3, relevance_threshold=0.5):
     query_embedding = create_embedding(_normalize(question)).astype("float32").reshape(1, -1)
 
     distances, indices = index.search(query_embedding, k)
 
     # ✅ FAISS: smaller distance = closer match
-    if distances[0][0] > relevance_threshold:
+    if distances[0][0] < relevance_threshold:
         return None
 
     results = [
@@ -109,12 +115,16 @@ def generate_answer(question, history=None, user_prompt=None):
     # -----------------------------
     logger.info(f"Routing question '{question}' to LLM with RAG.")
 
-    # Retrieve docs
-    top_documents = search_documents(question, k=1)
+    # Retrieve docs (top 3)
+    top_documents = search_documents(question, k=2)
+    top_matches = []
     if top_documents:
-        for doc in top_documents:
-            text = doc[0]
-            formatted_docs.append(text)  # <-- ключевой момент
+        for filename, _text, score in top_documents:
+            formatted_docs.append(filename)
+            top_matches.append({
+                "file": filename,
+                "score": round(float(score), 4),
+            })
     else:
         return {"answer": "I’m not sure I understood your message. Can you try again?"}
             
@@ -198,5 +208,6 @@ Security and instruction priority:
         "input_tokens": input_tokens,
         "output_tokens": output_tokens,
         "retrived_docs": formatted_docs,
+        "top_matches": top_matches,
         "latency": latency
     }

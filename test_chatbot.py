@@ -1,97 +1,128 @@
 import os
-import requests
-import json
-from datasets import Dataset
-from ragas import evaluate
-from ragas.metrics import answer_relevancy, faithfulness
-from langchain_google_genai import ChatGoogleGenerativeAI
-from dotenv import load_dotenv
 import time
-import numpy
+import json
+import requests
+import numpy as np
 import pandas as pd
+from sentence_transformers import SentenceTransformer, util
 
-
+# --- Initialize metrics ---
 latencies = []
-input_tokens = 0
-output_tokens = 0
+successes = []
+total_input_tokens = 0
+total_output_tokens = 0
 
-with open("RAGAS_dataset.json") as f:
+# --- Load golden dataset ---
+with open("dataset.json", "r", encoding="utf-8") as f:
     golden_data = json.load(f)
-questions = [item['question'] for item in golden_data]
+questions = [item["question"] for item in golden_data]
+
+# --- Define chatbot query helper ---
 
 
 def add_chatbot_answer_to_dataset(question):
-    global input_tokens
-    global output_tokens
+    global total_input_tokens, total_output_tokens
 
-    start = time.time()
+    start_time = time.perf_counter()
+    answer = ""
+    in_tokens = 0
+    out_tokens = 0
+    success = False
+
     try:
-        chat_response = requests.post("https://qwallity-chatbot.onrender.com/api/chat",
-                                    json={"message": question, "show_tokens": True},
-                                    timeout=20)
-        result = chat_response.json()
-        answer = result.get("answer")[0]
-        input_tokens_number = result.get("answer")[1]
-        output_tokens_number = result.get("answer")[2]
-        input_tokens += input_tokens_number
-        output_tokens += output_tokens_number
-    except Exception as e:  
-        print(f"Error is {e}")
+        response = requests.post(
+            "https://qwallity-ai-chatbot.fly.dev/api/chat",
+            json={"message": question, "show_details": True},
+            timeout=20
+        )
+        response.raise_for_status()
+        result = response.json()
+
+        # Safely unpack the answer structure
+        answer_data = result.get("answer", {})
+
+        answer = answer_data.get("answer", "")
+        in_tokens = answer_data.get("input_tokens", 0)
+        out_tokens = answer_data.get("output_tokens", 0)
+
+        # Update global accumulators
+        total_input_tokens += in_tokens
+        total_output_tokens += out_tokens
+        success = bool(answer)
+
+    except Exception as e:
+        print(f"[ERROR] {e}")
+
     finally:
-        latencies.append(time.time() - start)
+        latencies.append(time.perf_counter() - start_time)
+        successes.append(success)
+
+    # Update dataset dictionary so data persists for the evaluation loop
     for item in golden_data:
-        if item['question'] == question:
+        if item["question"] == question:
             item["answer"] = answer
+            item["input_tokens"] = in_tokens
+            item["output_tokens"] = out_tokens
             item["contexts"] = []
             break
 
-# Add chatbot answers and context to dataset
+
+# --- Query chatbot for all questions ---
 for question in questions:
     add_chatbot_answer_to_dataset(question)
+    time.sleep(0.5)
 
-load_dotenv()
-os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
-# Connect Gemini model
-llm = ChatGoogleGenerativeAI(model="gemini-flash-lite-latest")
+# --- Evaluate semantic similarity ---
+embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Create Dataset (RAGAS needs this format)
-print(golden_data)
-dataset = Dataset.from_list(golden_data)
-results = evaluate(
-    dataset=dataset,
-    metrics=[
-        answer_relevancy,
- 
-    ],
-    llm=llm)
+# Pre-calculate embeddings for better performance
+semantic_scores = []
+for item in golden_data:
+    # Handle empty answers to prevent errors
+    ans_text = item.get("answer", "")
+    if not ans_text:
+        semantic_scores.append(0.0)
+        continue
 
-# calculate metrics
-accuracy = float(numpy.mean(results["answer_relevancy"])) * 100
-avg_latency = sum(latencies) / len(latencies)
-avg_input_tokens = input_tokens / len(golden_data)
-avg_output_tokens = output_tokens / len(golden_data)
-throughput = 60 / avg_latency if avg_latency > 0 else 0
-error_rate = 100 - accuracy
-prompt_cost = (avg_input_tokens / 1_000_000)*0.10 + (avg_output_tokens / 1_000_000)* 0.40 
+    gt_emb = embedder.encode(item["expected_result"], convert_to_tensor=True)
+    ans_emb = embedder.encode(ans_text, convert_to_tensor=True)
+    similarity = util.cos_sim(gt_emb, ans_emb).item()
+    semantic_scores.append(float(np.clip(similarity, 0, 1)))
 
-metrics = {
-    "Accuracy (%)": round(accuracy, 2),
-    "Error Rate (%)": round(error_rate, 2),
-    "Latency (s)": round(avg_latency, 2),
-    "Throughput (per min)": round(throughput, 2),
-    "Avg Input Tokens": round(avg_input_tokens, 2),
-    "Avg Output Tokens": round(avg_output_tokens, 2),
-    "Prompt Cost ($)": round(prompt_cost, 4)
-}
-file_path = "metrics_results.xlsx"
+# --- Calculate metrics ---
+results = []
 
-if os.path.exists(file_path):
-    # Append new results to existing file
-    existing_df = pd.read_excel(file_path)
-    updated_df = pd.concat([existing_df, pd.DataFrame([metrics])], ignore_index=True)
-else:
-    # Create a new file with headers
-    updated_df = pd.DataFrame([metrics])
+for i in range(len(golden_data)):
+    item = golden_data[i]
+    similarity = semantic_scores[i]
+    semantic_similarity_pct = similarity * 100
 
-updated_df.to_excel(file_path, index=False)
-print("Results saved to chatbot_evaluation.xlsx")
+    latency = latencies[i]
+    success = successes[i]
+    throughput = 60 / latency if latency > 0 else 0
+
+    # These now exist because we saved them in the helper function
+    in_tokens = item.get("input_tokens", 0)
+    out_tokens = item.get("output_tokens", 0)
+
+    prompt_cost = (
+        (in_tokens / 1_000_000) * 0.10 +
+        (out_tokens / 1_000_000) * 0.40
+    )
+
+    results.append({
+        "Question": item["question"],
+        "Success": success,
+        "Semantic Similarity (%)": round(semantic_similarity_pct, 2),
+        "Latency (s)": round(latency, 2),
+        "Estimated Throughput (per min)": round(throughput, 2),
+        "Input Tokens": in_tokens,
+        "Output Tokens": out_tokens,
+        "Prompt Cost ($)": round(prompt_cost, 6),
+    })
+
+results_df = pd.DataFrame(results)
+results_df.to_excel("metrics_per_question.xlsx", index=False)
+
+print(
+    f"[INFO] Per-question metrics saved. Total Input Tokens: {total_input_tokens}")
