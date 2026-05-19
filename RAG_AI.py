@@ -6,8 +6,6 @@ from google import genai
 from text_classifier import classify_text
 import logging
 import time
-from spellchecker import SpellChecker
-
 
 
 load_dotenv()
