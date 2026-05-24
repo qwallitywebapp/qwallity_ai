@@ -1,0 +1,11 @@
+# User Profile Settings  
+- **Fields:**  
+  - Country: Max 50 characters (letters).  
+  - City: Max 50 characters (letters).  
+  - Address: Max 50 characters (any).  
+  - Phone: Numbers only.  
+  - Gender: Dropdown (Male/Female).  
+  - Marital status: Dropdown (single/divorced/married).  
+- **Database Logic:**   
+  - Saves to MySQL (`Users` table) or MongoDB (`Users` collection).  
+  - Configurable at the code level.  

@@ -1,0 +1,12 @@
+# User Registration Requirements  
+- **Fields:**   
+  - Name: Up to 25 characters, letters only.  
+  - Email: Format `xxx@domain`. Must be unique.  
+  - Username: Alphanumeric, up to 50 characters. Must be unique.  
+  - Password: 8-14 alphanumeric characters.  
+  - Confirm Password: Must match Password field.  
+- **Validation:** All fields are required.   
+- **Error Messages:**   
+  - Invalid Email: "Please use valid email format."  
+  - Duplicate Username: "Username already exists."  
+- **Success State:** After submission, display: "Your account has been successfully created."  
