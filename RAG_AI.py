@@ -66,21 +66,18 @@ file_names = [filename for filename, _ in documents]
 conversation_history = []
 
 
-def search_documents(question, k=3, relevance_threshold=0.5):
+def search_documents(question, k=3, relevance_threshold=0.65):
     query_embedding = create_embedding(_normalize(question)).astype("float32").reshape(1, -1)
 
     distances, indices = index.search(query_embedding, k)
 
-    # ✅ FAISS: smaller distance = closer match
-    if distances[0][0] < relevance_threshold:
-        return None
-
     results = [
         (file_names[idx], documents[idx][1], distances[0][i])
         for i, idx in enumerate(indices[0])
+        if distances[0][i] > relevance_threshold
     ]
-    return results
 
+    return results if results else None
 
 def generate_answer(question, history=None, user_prompt=None):
     formatted_docs = []
@@ -112,7 +109,7 @@ def generate_answer(question, history=None, user_prompt=None):
     logger.info(f"Routing question '{question}' to LLM with RAG.")
 
     # Retrieve docs (top 3)
-    top_documents = search_documents(question, k=2)
+    top_documents = search_documents(question, k=3)
     top_matches = []
     if top_documents:
         for filename, _text, score in top_documents:
@@ -122,7 +119,7 @@ def generate_answer(question, history=None, user_prompt=None):
                 "score": round(float(score), 4),
             })
     else:
-        return {"answer": "I’m not sure I understood your message. Can you try again?"}
+        return {"answer": "I’m not sure I understood your message. Can you you ask question from documents?"}
             
 
     relevant_texts = [doc[1] for doc in top_documents] if top_documents else []
