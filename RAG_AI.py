@@ -66,7 +66,7 @@ file_names = [filename for filename, _ in documents]
 conversation_history = []
 
 
-def search_documents(question, k=3, relevance_threshold=0.65):
+def search_documents(question, k=3, relevance_threshold=0.60):
     query_embedding = create_embedding(_normalize(question)).astype("float32").reshape(1, -1)
 
     distances, indices = index.search(query_embedding, k)
@@ -79,13 +79,38 @@ def search_documents(question, k=3, relevance_threshold=0.65):
 
     return results if results else None
 
+
+def build_classification_input(question, history, max_user_messages=3):
+    if history is None:
+        history = []
+
+    user_messages = [
+        msg["content"]
+        for msg in history
+        if msg["role"] == "user"
+    ]
+
+    # Keep only the last few user messages
+    recent_messages = user_messages[-max_user_messages:]
+
+    # Avoid duplicating the current question if it's already in history
+    if not recent_messages or recent_messages[-1] != question:
+        recent_messages.append(question)
+
+    return "\n".join(recent_messages)
+
 def generate_answer(question, history=None, user_prompt=None):
     formatted_docs = []
     start_time = time.perf_counter()
     if history is None:
         history = []
 
-    classification_result = classify_text(_normalize(question))
+    classification_input = build_classification_input(question, history)
+
+    classification_result = classify_text(
+        _normalize(classification_input)
+    )
+
     question_type = classification_result["label"]
 
     # -----------------------------
@@ -118,9 +143,7 @@ def generate_answer(question, history=None, user_prompt=None):
                 "file": filename,
                 "score": round(float(score), 4),
             })
-    else:
-        return {"answer": "I’m not sure I understood your message. Can you you ask question from documents?"}
-            
+
 
     relevant_texts = [doc[1] for doc in top_documents] if top_documents else []
     combined_text = "\n\n".join(relevant_texts)
