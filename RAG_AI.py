@@ -67,6 +67,8 @@ conversation_history = []
 
 
 def search_documents(question, k=3, relevance_threshold=0.60):
+def search_documents(question, k=3, relevance_threshold=0.60):
+
     query_embedding = create_embedding(_normalize(question)).astype("float32").reshape(1, -1)
 
     distances, indices = index.search(query_embedding, k)
