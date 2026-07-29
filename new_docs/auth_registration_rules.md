@@ -3,7 +3,7 @@
   - Name: Up to 25 characters, letters only.  
   - Email: Format `xxx@domain`. Must be unique.  
   - Username: Alphanumeric, up to 50 characters. Must be unique.  
-  - Password: 8-14 alphanumeric characters.  
+  - Password: 6-14 alphanumeric characters.  
   - Confirm Password: Must match Password field.  
 - **Validation:** All fields are required.   
 - **Error Messages:**   
