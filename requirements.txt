@@ -4,6 +4,7 @@ aiosignal
 allure-pytest
 allure-python-commons
 annotated-types
+anthropic
 apipkg
 appdirs
 astroid
@@ -53,15 +54,11 @@ flask-swagger-ui
 fonttools
 frozenlist
 ghp-import
-google
-google-genai
-google-ai-generativelanguage
 google-api-core
 google-api-python-client
 google-auth
 google-auth-httplib2
 google-auth-oauthlib
-google-generativeai
 googleapis-common-protos
 greenlet
 grpcio
@@ -143,6 +140,7 @@ requests-oauthlib
 rpds-py
 rsa
 selenium
+sentence-transformers
 setuptools
 simple-websocket
 six

@@ -82,11 +82,11 @@ class UserPayments(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
     payment_amount = db.Column(db.Integer, nullable=False)
-    payment_method = db.Column(db.String, nullable=False)
+    payment_method = db.Column(db.String(50), nullable=False)
     payment_date = db.Column(db.DateTime)
     card_number = db.Column(db.Integer)
     exp_date = db.Column(db.DateTime)
-    card_cvv = db.Column(db.String)
+    card_cvv = db.Column(db.String(10))
 
     def __repr__(self):
         return '<UserPayments %r>'%self.id
@@ -94,9 +94,9 @@ class UserPayments(db.Model):
 class UserImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     image = db.Column(db.TEXT, nullable=False)
-    filename = db.Column(db.String, nullable=False)
-    username = db.Column(db.String)
-    mimetype = db.Column(db.String)
+    filename = db.Column(db.String(255), nullable=False)
+    username = db.Column(db.String(255))
+    mimetype = db.Column(db.String(100))
 
     def __repr__(self):
         return '<UserImage %r>'%self.id
