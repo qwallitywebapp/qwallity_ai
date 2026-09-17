@@ -1,8 +1,11 @@
+# Embeddings run over the Gemini API and generation over Claude, so this app
+# needs no local ML stack. Do not add sentence-transformers or torch back:
+# torch resolves to the GPU wheel and drags in ~2.5GB of CUDA libraries, which
+# is what made the Render build and boot time out.
+
 aiohappyeyeballs
 aiohttp
 aiosignal
-allure-pytest
-allure-python-commons
 annotated-types
 anthropic
 apipkg
@@ -28,10 +31,8 @@ click
 colorama
 configparser
 contourpy
-crayons
 cycler
 decorator
-deepdiff
 distlib
 dnspython
 docxcompose
@@ -39,7 +40,6 @@ docxtpl
 exceptiongroup
 execnet
 faiss-cpu
-Faker
 filelock
 Flask
 Flask-Ext
@@ -53,7 +53,7 @@ Flask-SQLAlchemy
 flask-swagger-ui
 fonttools
 frozenlist
-ghp-import
+google-genai
 google-api-core
 google-api-python-client
 google-auth
@@ -65,7 +65,6 @@ grpcio
 grpcio-status
 gunicorn
 h11
-helium
 httplib2
 idna
 importlib_metadata
@@ -87,9 +86,6 @@ marshmallow
 matplotlib
 mccabe
 mergedeep
-mkdocs
-mkdocs-get-deps
-MouseInfo
 msgspec
 multidict
 mysql
@@ -98,7 +94,6 @@ marshmallow-sqlalchemy
 mysqlclient
 numpy
 oauthlib
-openai
 ordered-set
 orderly-set
 outcome
@@ -122,10 +117,8 @@ pydantic_core
 PyJWT
 PyMySQL
 pyparsing
-pyperclip
 pyrsistent
 PySocks
-pytest
 python-dateutil
 python-docx
 python-dotenv
@@ -139,8 +132,6 @@ requests
 requests-oauthlib
 rpds-py
 rsa
-selenium
-sentence-transformers
 setuptools
 simple-websocket
 six
@@ -148,9 +139,7 @@ sniffio
 sortedcontainers
 soupsieve
 SQLAlchemy
-scikit-learn
 text-unidecode
-tk
 toml
 tomli
 tqdm
@@ -163,10 +152,8 @@ tzdata
 uritemplate
 urllib3
 watchdog
-webdriver-manager
 websocket-client
 Werkzeug
-wget
 wheel
 wrapt
 wsproto

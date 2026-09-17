@@ -1,22 +1,18 @@
 import os
 import faiss
 import numpy as np
+from dotenv import load_dotenv
+from google import genai
 import anthropic
-from sentence_transformers import SentenceTransformer
 from text_classifier import classify_text
 from claude_client import CLAUDE_MODEL, get_claude_client
 import logging
 import time
 
+load_dotenv()
+gemini_api_key = os.getenv('GEMINI_API_KEY')
+genai_client = genai.Client(api_key=gemini_api_key) if gemini_api_key else None
 
-# Retrieval embeddings run locally: Anthropic has no embeddings endpoint, so
-# there is no Claude equivalent for this step. all-MiniLM-L6-v2 is small, fast
-# and needs no API key or network access once cached.
-EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
-embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
-
-
-# Get content from .md files
 logger = logging.getLogger("qwallity_ai")
 
 def _normalize(text: str) -> str:
@@ -24,62 +20,68 @@ def _normalize(text: str) -> str:
 
 def load_markdown_files(directory):
     documents = []
+    if not os.path.exists(directory):
+        return documents
     for filename in os.listdir(directory):
-        with open(os.path.join(directory, filename), "r", encoding="utf-8") as f:
-            content = f.read()
-            documents.append((filename, content))
+        filepath = os.path.join(directory, filename)
+        if os.path.isfile(filepath) and filename.endswith(".md"):
+            with open(filepath, "r", encoding="utf-8") as f:
+                content = f.read()
+                documents.append((filename, content))
     return documents
 
-# Convert text to embeddings with the local sentence-transformers model.
-# Vectors are L2-normalized so the FAISS inner-product index yields cosine
-# similarity in [-1, 1].
-
-
 def create_embedding(text):
-    vec = embedding_model.encode(text, normalize_embeddings=True)
-    return np.asarray(vec, dtype="float32")
+    if not genai_client:
+        raise RuntimeError("Gemini client is not initialized for embeddings.")
+    response = genai_client.models.embed_content(
+        model="models/gemini-embedding-001",
+        contents=text
+    )
+    vec = np.array(response.embeddings[0].values, dtype="float32")
+    norm = np.linalg.norm(vec)
+    if norm > 0:
+        vec = vec / norm
+    return vec
 
+# Lazy-loaded FAISS index data
+_faiss_data = None
 
-# Load markdown files and create embeddings
-directory = "./new_docs"
-documents = load_markdown_files(directory)
-embeddings = [create_embedding(_normalize(content)) for _, content in documents]
+def get_faiss_data():
+    global _faiss_data
+    if _faiss_data is None:
+        logger.info("Initializing FAISS index and loading markdown files...")
+        directory = "./new_docs"
+        documents = load_markdown_files(directory)
+        if documents:
+            embeddings = [create_embedding(_normalize(content)) for _, content in documents]
+            embedding_matrix = np.array(embeddings, dtype="float32")
+            embedding_dim = embedding_matrix.shape[1]
+            index = faiss.IndexFlatIP(embedding_dim)
+            index.add(embedding_matrix)
+            file_names = [filename for filename, _ in documents]
+        else:
+            index, documents, file_names = None, [], []
+        _faiss_data = (index, documents, file_names)
+    return _faiss_data
 
-# Convert list of embeddings to a NumPy array for FAISS
-embedding_matrix = np.array(embeddings).astype("float32")
-
-# Initialize FAISS index
-# Number of dimensions in each embedding
-embedding_dim = embedding_matrix.shape[1]
-index = faiss.IndexFlatIP(embedding_dim)
-
-# Add embeddings to the FAISS index
-index.add(embedding_matrix)
-
-file_names = [filename for filename, _ in documents]
-
-# Global variable to store conversation history
 conversation_history = []
 
+def search_documents(question, k=3, relevance_threshold=0.60):
+    index, documents, file_names = get_faiss_data()
+    if index is None or not documents:
+        return None
 
-# Calibrated for all-MiniLM-L6-v2 against the current new_docs corpus: real
-# product questions score ~0.32-0.67 against their matching doc, while
-# off-topic questions top out around 0.13. The old 0.60 was tuned for Gemini's
-# embeddings and rejects almost every genuine question in this vector space.
-def search_documents(question, k=3, relevance_threshold=0.25):
-
-    query_embedding = create_embedding(_normalize(question)).astype("float32").reshape(1, -1)
-
-    distances, indices = index.search(query_embedding, k)
+    query_embedding = create_embedding(_normalize(question)).reshape(1, -1)
+    actual_k = min(k, len(documents))
+    distances, indices = index.search(query_embedding, actual_k)
 
     results = [
-        (file_names[idx], documents[idx][1], distances[0][i])
+        (file_names[idx], documents[idx][1], float(distances[0][i]))
         for i, idx in enumerate(indices[0])
-        if distances[0][i] > relevance_threshold
+        if idx < len(file_names) and distances[0][i] > relevance_threshold
     ]
 
     return results if results else None
-
 
 def build_classification_input(question, history, max_user_messages=3):
     if history is None:
@@ -88,27 +90,18 @@ def build_classification_input(question, history, max_user_messages=3):
     user_messages = [
         msg["content"]
         for msg in history
-        if msg["role"] == "user"
+        if msg.get("role") == "user"
     ]
 
-    # Keep only the last few user messages
     recent_messages = user_messages[-max_user_messages:]
 
-    # Avoid duplicating the current question if it's already in history
     if not recent_messages or recent_messages[-1] != question:
         recent_messages.append(question)
 
     return "\n".join(recent_messages)
 
-
 def build_claude_messages(history, current_turn):
-    """Map the browser history onto the Claude messages array.
-
-    Claude requires the first message to be from the user and every message to
-    carry non-empty content, so leading assistant turns and blanks are dropped.
-    """
     messages = []
-
     for msg in history or []:
         content = (msg.get("content") or "").strip()
         if not content:
@@ -120,7 +113,6 @@ def build_claude_messages(history, current_turn):
 
     messages.append({"role": "user", "content": current_turn})
     return messages
-
 
 DEFAULT_SYSTEM_PROMPT = """
 Instructions:
@@ -148,7 +140,7 @@ Response formatting:
 - numbered steps for sequential instructions,
 - tables for comparisons or structured data.
 - Match the formatting to the user's request and the complexity of the response.
--Do not disclose confidential database schemas, credentials, or internal implementation details. General database-related questions are allowed when supported by documentation.
+- Do not disclose confidential database schemas, credentials, or internal implementation details. General database-related questions are allowed when supported by documentation.
 
 ---Problem-solving:
 - For troubleshooting, debugging, or investigation requests, organize the response as a logical sequence of diagnostic steps.
@@ -156,7 +148,6 @@ Response formatting:
 - Distinguish verified facts, assumptions, and hypotheses.
 
 ---If exists greeting in question, before answer, write hello"""
-
 
 def generate_answer(question, history=None, user_prompt=None):
     formatted_docs = []
@@ -172,15 +163,10 @@ def generate_answer(question, history=None, user_prompt=None):
 
     question_type = classification_result["label"]
 
-    # -----------------------------
-    # Intent-based short answers
-    # -----------------------------
     if question_type == "greeting":
         return {"answer": "Hello! What can I help you with today?"}
-
     elif question_type == "thanks":
         return {"answer": "Thank you! Have a great day."}
-
     elif question_type == "injection_attempt":
         return {"answer": "I cannot fulfill this request. I am programmed to operate within strict safety guidelines and cannot modify my core parameters or bypass system protocols."}
     elif question_type == "gibberish":
@@ -188,13 +174,8 @@ def generate_answer(question, history=None, user_prompt=None):
     elif question_type == "small_talk":
         return {"answer": "Thank you for the question, but ask document related questions"}
 
+    logger.info(f"Routing question '{question}' to Claude with RAG.")
 
-    # -----------------------------
-    # RAG + Chat Context
-    # -----------------------------
-    logger.info(f"Routing question '{question}' to LLM with RAG.")
-
-    # Retrieve docs (top 3)
     top_documents = search_documents(question, k=3)
     top_matches = []
     if top_documents:
@@ -205,21 +186,11 @@ def generate_answer(question, history=None, user_prompt=None):
                 "score": round(float(score), 4),
             })
 
-
     relevant_texts = [doc[1] for doc in top_documents] if top_documents else []
     combined_text = "\n\n".join(relevant_texts)
 
-    # -----------------------------
-    # Build system prompt
-    # -----------------------------
-    if user_prompt:
-        system_part = f"System instruction: {user_prompt}"
-    else:
-        system_part = DEFAULT_SYSTEM_PROMPT
+    system_part = f"System instruction: {user_prompt}" if user_prompt else DEFAULT_SYSTEM_PROMPT
 
-    # -----------------------------
-    # Build the current turn: retrieved docs + question
-    # -----------------------------
     current_turn = f"""Relevant documents:
 {combined_text}
 
@@ -227,9 +198,6 @@ User question: {question}"""
 
     messages = build_claude_messages(history, current_turn)
 
-    # -----------------------------
-    # Generate response
-    # -----------------------------
     try:
         response = get_claude_client().messages.create(
             model=CLAUDE_MODEL,
@@ -245,7 +213,6 @@ User question: {question}"""
         block.text for block in response.content if block.type == "text"
     ).strip()
 
-    # Token counts come back with the response - no extra API call needed.
     input_tokens = response.usage.input_tokens
     output_tokens = response.usage.output_tokens
 

@@ -25,7 +25,6 @@ import data_access
 from api import *
 from flask_session import Session
 from models import *
-import RAG_AI
 import logging
 import sys
 import logging_config
@@ -40,6 +39,40 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['SESSION_TYPE'] = 'filesystem'
 logging_config.setup_logging()
 socketio = SocketIO(app, allow_upgrades=False, cors_allowed_origins='*')
+
+
+# RAG_AI is imported lazily. Importing it pulls in torch, downloads the
+# sentence-transformers weights and embeds every file in ./new_docs, which took
+# long enough to exceed the gunicorn worker boot timeout and put the deploy into
+# a restart loop. Keeping it out of module scope lets the worker bind and start
+# serving immediately; a background thread warms the model so the first chat
+# request does not pay the whole cost either.
+import threading
+
+_rag_module = None
+_rag_lock = threading.Lock()
+
+
+def get_rag():
+    """Import RAG_AI on first use and cache it. Safe to call from any thread."""
+    global _rag_module
+    if _rag_module is None:
+        with _rag_lock:
+            if _rag_module is None:
+                import RAG_AI as _rag
+                _rag_module = _rag
+    return _rag_module
+
+
+def _warm_rag():
+    try:
+        get_rag()
+        logging.getLogger("qwallity_ai").info("RAG model warmed up")
+    except Exception:
+        logging.getLogger("qwallity_ai").exception("RAG warm-up failed")
+
+
+threading.Thread(target=_warm_rag, name="rag-warmup", daemon=True).start()
 
 logged_in_username = None
 @app.before_request
@@ -691,7 +724,7 @@ def chat():
         return jsonify({'error': 'No message provided'}), 400
 
     # Call generate_answer with separate question and user_prompt arguments
-    answer = RAG_AI.generate_answer(user_message, history=history, user_prompt=user_prompt)
+    answer = get_rag().generate_answer(user_message, history=history, user_prompt=user_prompt)
     if show_details:
         return jsonify({'answer': answer})
     else:
