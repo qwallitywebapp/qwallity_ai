@@ -14,6 +14,11 @@
             "email": "qwallity@gmail.com",
             "code": "12345678",
             "access": 0
+        },
+        {
+            "email": "qwallityapi230926@gmail.com",
+            "code": "qwallity_230926",
+            "access": 0
         }
     ]
 }
