@@ -11,7 +11,7 @@ load_dotenv()
 
 # Haiku 4.5 is the cheapest current Claude model ($1/$5 per 1M tokens) and fits
 # both workloads here: short intent labels and short grounded answers.
-CLAUDE_MODEL = "claude-opus-5"
+CLAUDE_MODEL = "claude-haiku-4-5"
 
 _claude_client = None
 
